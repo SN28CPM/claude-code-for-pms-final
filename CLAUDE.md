@@ -27,4 +27,113 @@ teaching scenario.
 
 ## Working context
 
-_You'll fill this in during Module 1._
+I'm the new PM for **Rook Dispatch**, replacing Priya Raghunathan (left 21 Aug 2026,
+no overlap). Sources: Rook wiki (About Rook, Glossary, Team directory, Releases,
+Q3 roadmap, Product briefs) and `00-rook/company/notes/handoff-from-priya.docx`.
+
+### The company
+- Rook Industries sells coordination and provisioning software to independent
+  masked responders and the handlers and quartermasters who support them. Rook
+  doesn't employ responders. Publicly it presents as a logistics/workforce vendor.
+- 241 staff, mostly remote (HQ Site Aleph; Berlin, Singapore, Cornwall). Revenue is
+  per active responder. Monthly release train, 4.x numbering.
+- **Confidentiality (contractual):** cover identities are never stored. Never design
+  for, or try to work out, a responder's legal identity. Read Security Policy 4.1
+  before touching responder records.
+
+### Products
+| Product | What it does | Users |
+| --- | --- | --- |
+| Rook Dispatch (mine, the flagship) | Availability, proximity, who gets pinged for a callout, and whether they take it | Handlers (desktop console); responders (phone) |
+| Rook Supply | Requisitions, maintenance, field failure reports | Handlers, quartermasters |
+
+Dispatch writes the Responder Availability Record. Supply reads it for maintenance scheduling.
+
+### Vocabulary (Rook-specific meanings)
+- **Callout**: a request for a responder to attend an incident (the unit of work).
+  **Ping**: one callout offered to one responder's phone.
+- Ping outcomes: **taken**, **turned down**, or **missed** (the ping wait ran out).
+  Turned down and missed are recorded separately, but both move the ping to the next responder.
+- **Ping wait**: how long a ping stays live. It's global and set per release (90s → 60s in 4.2).
+- **Acceptance rate**: share of pings taken. This is the headline metric.
+  **Time-to-accept**: the median number of seconds from sending a ping to it being taken.
+- **Coverage gap**: no available responder had the required tags. Nobody *could* go,
+  which is not the same as low acceptance.
+- **Routing priority**: the score that ranks responders. Inputs are proximity (a travel-time
+  estimate), availability, capability match and recent acceptance history. Turning a ping
+  down or missing it lowers your future rank.
+- **Capability tags**: flight, structural-entry, hazmat-tolerant, cold-weather, aquatic,
+  crowd-management, de-escalation.
+- **Handler**: looks after one or a few responders, and is usually the person using the product.
+  **Quartermaster**: owns gear stock and approves requisitions (a Supply user).
+  **Mutual aid**: responders covering each other's areas. It isn't supported yet and is
+  on the Q4 exploration list.
+
+### People (Dispatch team, as of 2 Sep 2026)
+Wiki comments sign with roles. Here's who each role is:
+| Role in comments | Person | Location | Notes |
+| --- | --- | --- | --- |
+| Engineering manager | Marcus Oyelaran | Site Aleph | Runs Dispatch eng. Priya says he's direct; ask him first |
+| Staff engineer | Wen Li | Berlin | Built the code that decides who gets pinged. No written spec exists. Was away 14–24 Aug |
+| Product designer | Sofia Marino | Site Aleph | Console + phone app; ran the September interviews |
+| Support lead | Nadia Hoffmann | Berlin | Tickets; hears handler pain first. Priya suggests a standing 15 min |
+| Director of Product | Helen Achebe | Site Aleph | My director; owns roadmap and commitments |
+| Data analyst | Ravi Menon | Singapore | Owns the weekly acceptance-rate numbers. He isn't in the 4.2 thread |
+
+### Releases
+- **4.0** (7 Apr): new console navigation, responder profile redesign, routing override audit log.
+- **4.1** (16 Jun): proximity now uses a travel-time estimate, bulk callout, push reliability.
+- **4.2** (12 Aug): proximity weighted up relative to recent acceptance history; ping wait
+  90 → 60s; console filters persist; three defect fixes. Release notes leave out deferred items.
+
+### Where things stand on 4.2 (per the wiki thread and the handoff)
+- Since 4.2, fewer pings are being taken, and callout tickets are running about 3x normal.
+  Nadia's split is ~2/3 "phone never goes off" and ~1/3 "gone before I could answer".
+  She attributes the second to the 60s ping wait. She can't explain the first.
+  Volume was flat but still elevated on 26 Aug, and a handler emailed her directly.
+- On 14 Aug, Marcus asked whether the routing change was *meant* to apply to responders who'd
+  been turning jobs down. He said the config doesn't distinguish them. Wen was away. The thread
+  shows no answer.
+- Nadia asked for the acceptance trend. Marcus offered "rough", not the real weekly numbers.
+- Priya's view: it's mostly August seasonality, so wait for September and don't revert 4.2,
+  because the change was a three-quarter-old ask from wide-area responders. Marcus repeated
+  "August dip" on 26 Aug.
+- On 28 Aug, Marcus proposed regrouping on 4.2 once the new PM had had a week. Nadia has a
+  ticket breakdown ready.
+
+### Roadmap (Q3, last reviewed 30 Jun, every item owned by Priya, so ownership needs reassigning)
+| Item | Target | Status |
+| --- | --- | --- |
+| Change to who gets pinged | 4.2 | Committed. Shipped |
+| Ping timeout tuning | 4.2 | Committed. The 60s cut shipped; unclear if that's the whole item |
+| Availability Confidence | 4.2 | Committed. **Not in 4.2 release notes** |
+| Requisition approval chains (Supply) | 4.3 | Committed |
+| Handler phone app | Q4 | Exploring |
+| Shared cover between responders | Q4 | Exploring |
+Committed items are "locked" and changes go through Product. Priya flagged that items squeezed
+out of 4.2 still need a conversation with Helen about whether they remain Q3 commitments.
+
+### Product briefs
+- **Routing Override Audit Log** and **Bulk Callout** shipped (4.0, 4.1). Bulk Callout's
+  brief wanted a time-to-full-coverage baseline first.
+- **Handler Phone App** (8 Sep): notifications, status view and one-tap contact for handlers.
+  Sofia is exploring it for Q4, unstaffed. It came from Aunt Dot's interview.
+- **Requisition Approval Chains** (Supply): a second sign-off over $2,000, plus heavy scope
+  creep (48h reroute, dashboard, handler tracking, replacing Halloran's spreadsheet). Phasing TBD.
+
+### Priya's open asks for me
+- Settle the deferred-4.2-items question with Helen.
+- Write the missing description of how Dispatch decides who gets pinged.
+- Ignore filter-persistence ticket noise.
+
+Session notes (Module 1, 24 Oct 2026):
+- Availability Confidence is the only 4.2 item clearly deferred. Ping timeout tuning looks
+  shipped (the 60s cut). The wiki keeps no record of deferrals for 4.0 or 4.1.
+- Helen's ask is in `05-super-speed/director-request.txt`: a one-pager plus a clickable
+  prototype from the handler (Kip) and quiet-responder view before any code fix. It has no
+  severity and no deadline.
+- Nothing addressing the 4.2 problems is scheduled. 4.3 holds only Requisition approval chains (Supply).
+- No routing weights are documented anywhere. The code is in `00-rook/code/dispatch-routing/`
+  and hasn't been read yet.
+- Draft requirements, with acceptance criteria, are in `dispatch-4.2-requirements.md`. All
+  baselines are TBD until Ravi's numbers come in. The thresholds in it are placeholders.

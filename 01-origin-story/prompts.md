@@ -24,6 +24,32 @@ prompt library built from your own questions.
 
 ### 1.
 
+whats different in 4.2 from 4.0?
+
 ### 2.
 
+list the deferred features from all the releases so far
+
 ### 3.
+
+Are helens questions documented, if yes can you show it to me/
+
+### 4.
+
+Has this been added to the next release
+
+### 5.
+
+List out all the issues
+
+### 6.
+
+is there a priority criteria for the pings/
+
+### 7.
+
+is there a severity mentioned on the request
+
+### 8.
+
+Draft a requirement document that includes acceptance criteria to fix the mentioned issues
