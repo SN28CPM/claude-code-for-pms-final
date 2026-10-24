@@ -16,6 +16,20 @@ prompt library built from your own questions.
 
 ### 1.
 
+can you give me a graphical representation of the issues raised and a bulleted summary of suggested actions
+
 ### 2.
 
+can you create a product backlog including deferred itesm from 4.2
+
 ### 3.
+
+how many of these tickets were resolved and in how much time
+
+### 4.
+
+based on these responses can i get insight into where the issue could begiven the wide variety of responses in the interviews and the actual tickets
+
+### 5.
+
+create a set of test data to confirm solutions

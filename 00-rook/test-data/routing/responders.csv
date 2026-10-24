@@ -1,0 +1,13 @@
+name,cohort,area,x,y,capabilities,yes_chance
+TEST-01,quick,central,14.0,23.5,aquatic;cold-weather;crowd-management;flight,0.85
+TEST-02,quick,central,21.0,22.4,cold-weather;de-escalation;flight;structural-entry,0.85
+TEST-03,quick,outer,21.2,5.3,cold-weather;crowd-management;flight;structural-entry,0.85
+TEST-04,steady,central,21.7,23.7,aquatic;crowd-management;flight;structural-entry,0.85
+TEST-05,steady,outer,37.2,26.9,crowd-management;de-escalation;flight;hazmat-tolerant,0.85
+TEST-06,steady,outer,1.6,18.1,aquatic;cold-weather;crowd-management;hazmat-tolerant,0.85
+TEST-07,steady,central,19.8,16.8,cold-weather;de-escalation;hazmat-tolerant;structural-entry,0.85
+TEST-08,slow,central,21.9,21.0,cold-weather;crowd-management;hazmat-tolerant;structural-entry,0.85
+TEST-09,slow,central,23.9,26.7,cold-weather;de-escalation;flight;hazmat-tolerant,0.85
+TEST-10,slow,outer,17.4,1.8,aquatic;cold-weather;crowd-management;de-escalation,0.85
+TEST-11,slow,outer,22.5,34.9,aquatic;cold-weather;crowd-management;de-escalation,0.85
+TEST-12,disengaged,central,20.0,21.8,aquatic;cold-weather;crowd-management;structural-entry,0.25

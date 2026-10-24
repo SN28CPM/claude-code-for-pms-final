@@ -137,3 +137,17 @@ Session notes (Module 1, 24 Oct 2026):
   and hasn't been read yet.
 - Draft requirements, with acceptance criteria, are in `dispatch-4.2-requirements.md`. All
   baselines are TBD until Ravi's numbers come in. The thresholds in it are placeholders.
+
+Session notes (Module 2, 24 Oct 2026):
+- Interviews (Sofia, 2–5 Sep) and the 147 tickets come from different people. Only #3043
+  (Ambrose) overlaps. Interviews are loud on handler alerts, dark mode and text size. Tickets
+  are loud on quiet responders (30, all open, about Farlight, The Undertow, Corporal
+  Ashgrove and Halfmoon) and on pings gone before answering (15, all open, from 12 Aug).
+- 64/147 tickets are closed, and none filed after 27 Aug. The table has no closed date,
+  so time-to-resolve can't be measured.
+- Code confirms a missed ping is penalized like a turned-down one (−0.12 vs +0.08 credit),
+  with no easing back. Working theory: the 60s wait leads to more misses, a lower rank, and quiet responders.
+- `00-rook/test-data/routing/` runs synthetic data through the real code. Only the 90s
+  wait with the 4.2 weights passes every check. Answer speeds are assumed, so real
+  seconds-to-answer data is needed (the pings table lacks it).
+- Also drafted `dispatch-backlog.md`. Next: check the theory against the real `pings` table.
