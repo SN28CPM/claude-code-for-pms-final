@@ -151,3 +151,19 @@ Session notes (Module 2, 24 Oct 2026):
   wait with the 4.2 weights passes every check. Answer speeds are assumed, so real
   seconds-to-answer data is needed (the pings table lacks it).
 - Also drafted `dispatch-backlog.md`. Next: check the theory against the real `pings` table.
+
+Session notes (Module 3, 31 Oct 2026):
+- `pings` (1,696 rows, 29 Jun–6 Sep) confirms the theory. Acceptance was steady at ~77%, then
+  64% after 12 Aug. Missed went 2% → 18% starting on 12 Aug itself, and turn-downs didn't rise.
+  Callouts nobody took went 5.5% → 11%.
+- Tickets agree with pings: "gone before answering" tickets start 12 Aug, and pings to quiet
+  responders drop from 17 Aug, the same week the "quiet responder" tickets start.
+- Real collapse is Farlight, The Undertow, Vesper and Meteor Mite (18–29% taken after 4.2,
+  11–17 pings in ~4 weeks). There are no tickets about Vesper or Meteor Mite. Ashgrove and
+  Halfmoon are ticketed but mid-table.
+- No distance column exists, so I used callout area vs. responder home area as a stand-in.
+  Outsiders now take 82–94% of callouts in Uptown, Harborside, Old Town and Eastgate (the
+  home areas of the four collapsed responders). Before 4.2 they took 0%.
+- The acceptance score never resets or decays (2019 TODO in `history.py`), and scores live in
+  memory only. Open for Wen: are live scores persisted? Is answer time logged? Are real
+  travel-time estimates stored?
