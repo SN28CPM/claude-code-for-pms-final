@@ -167,3 +167,18 @@ Session notes (Module 3, 31 Oct 2026):
 - The acceptance score never resets or decays (2019 TODO in `history.py`), and scores live in
   memory only. Open for Wen: are live scores persisted? Is answer time logged? Are real
   travel-time estimates stored?
+
+Session notes (Module 4, 31 Oct 2026):
+- Routing flow: free responders in region (`availability.py`) → score (`routing.py`) → rank → offer one at a
+  time with 60s wait (`offer.py`) → yes +0.08 / no or miss −0.12 (`history.py`). Nobody is removed, only ordered.
+  Callout creation, travel-time and push code are stubs and live elsewhere.
+- Score = 0.60 × closeness (1 − min/45) + 0.25 × "said yes lately" + 0.15 × skills match. At score 0, max is 0.75.
+  A floored responder must be under ~3 min away to outrank a healthy one 20 min away.
+- Week-1 score hits after 4.2 predicted who went quiet (Undertow −0.72, Meteor Mite −0.56, Farlight −0.44).
+  Vesper (−0.20) collapsed and Nightwell (−0.32) grew, likely from unknown starting scores.
+- Marcus's 14 Aug question is half answered: the change applies to everyone, and the code can't tell a miss from a no.
+  The people hurt were missers, not turn-downers. Whether it was intended is open for Wen/Helen.
+- Three groups since 4.2: 4 dropped out (~12 → ~1/wk), 2 fading (Ashgrove, Halfmoon), 10 gaining (up to 21/wk, a
+  burnout risk). Still diverging at 31 Aug, so not seasonal. No trend by incident type (all 20 rose).
+- Recovery from 0 needs ~7 takes in a row (about 2 months at 1 ping/wk). Open: do restarts wipe scores, and do handler
+  overrides (4.0 audit log) bypass or affect scoring? Ask Wen/Marcus.

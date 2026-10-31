@@ -17,6 +17,24 @@ prompt library built from your own questions.
 
 ### 1.
 
+can code be optimized
+
 ### 2.
 
+WHATS THE SCORING FORMULA
+
 ### 3.
+
+IS THERE A TREND FOT THE RRSPONDERS
+
+### 4.
+
+IS THERE A TREND ON ARE THE MISSES OR ACCEPTANCES BASED ON THE TYPE OF CALLS
+
+### 5.
+
+what is impacting the ratings
+
+### 6.
+
+summarize todays resposes visually
