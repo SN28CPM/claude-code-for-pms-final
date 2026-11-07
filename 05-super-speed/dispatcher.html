@@ -493,6 +493,13 @@ document.querySelectorAll(".who").forEach(b => b.onclick = () => {
 });
 
 fresh(); render();
+
+// "?demo" freezes a callout at 60s (ping still open, The Gale asked) for screenshots.
+if (location.search.includes("demo")) {
+  s.launchSeen = true; start(); s.t = 59; tick();
+  clearInterval(timer); timer = 0; s.t = 61; lastSeen = Date.now(); detailKey = "";
+  document.documentElement.setAttribute("data-theme", "light"); render(); renderConn();
+}
 </script>
 </body>
 </html>

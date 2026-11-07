@@ -147,6 +147,13 @@ $("screen").addEventListener("click", e => {
 
 // Pick up the latest state if the dispatcher is already running, then keep saying hello.
 try { const saved = localStorage.getItem(STATE_KEY); if (saved) { st = JSON.parse(saved); lastPhase = st.s.phase; } } catch (e) {}
+// "?demo" shows the same frozen moment as dispatcher.html?demo, for screenshots.
+if (location.search.includes("demo")) {
+  st = { type: "state", mode: "proposal", running: true, at: Date.now(),
+         s: { t: 61, phase: "late", launchSeen: true, offered: 4, turned: 1, missed: 1 } };
+  lastAt = Date.now();
+  document.documentElement.setAttribute("data-theme", "light");
+}
 render(); send("hello");
 setInterval(() => { send("hello"); renderConn(); }, 2000);
 renderConn();
