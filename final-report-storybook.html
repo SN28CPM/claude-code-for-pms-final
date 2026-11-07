@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jedi Order Storybook</title>
+<style>
+:root{
+  --sky:#dff1ff;--paper:#fffaf0;--ink:#2b2340;--soft:#6c6485;--sun:#ffc94a;--grass:#8fd694;--card:#ffffff;
+  --mite:#ff8a5c;--gale:#5aa9ff;--far:#b98cff;--und:#3cc4b4;--ves:#ff6fa8;--kip:#9b7653;--robot:#9aa5b8;
+  --good:#2fbf71;--bad:#e5534b;--line:rgba(43,35,64,.15);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --sky:#1d2440;--paper:#191826;--ink:#f5f1ff;--soft:#b9b3cf;--card:#262438;--grass:#2f6b45;--line:rgba(255,255,255,.15);--robot:#7b8599;}}
+:root[data-theme="dark"]{--sky:#1d2440;--paper:#191826;--ink:#f5f1ff;--soft:#b9b3cf;--card:#262438;--grass:#2f6b45;--line:rgba(255,255,255,.15);--robot:#7b8599;}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--paper);color:var(--ink);font-family:"Comic Sans MS","Chalkboard SE","Marker Felt",ui-rounded,"Trebuchet MS",sans-serif;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer;border:3px solid var(--ink);background:var(--card);border-radius:999px;padding:10px 18px;font-size:18px}
+button:focus-visible{outline:4px solid var(--sun);outline-offset:3px}
+.book{position:fixed;inset:0;display:flex;flex-direction:column}
+.pages{flex:1;position:relative;overflow:hidden}
+.page{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:14px;padding:18px 16px 10px;overflow-y:auto;
+  opacity:0;visibility:hidden;transform:scale(.97) rotate(-.6deg);transition:opacity .45s,transform .45s,visibility .45s}
+.page.on{opacity:1;visibility:visible;transform:none}
+@media (prefers-reduced-motion: reduce){.page{transition:none;transform:none}*{animation:none!important}}
+.scene{width:min(860px,100%,calc((100dvh - 370px) * 1.778));min-width:min(300px,100%);aspect-ratio:16/9;border-radius:28px;background:var(--sky);border:4px solid var(--ink);overflow:hidden;flex-shrink:0}
+.scene svg{width:100%;height:100%;display:block}
+.words{font-size:clamp(21px,3.2vw,32px);line-height:1.25;text-align:center;max-width:24ch;font-weight:700}
+.words em{font-style:normal;background:var(--sun);color:#2b2340;padding:0 8px;border-radius:10px}
+.grown{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px;color:var(--soft);text-align:center;max-width:70ch}
+.bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:3px solid var(--ink);background:var(--card)}
+.bar .mid{flex:1;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.dot{width:14px;height:14px;padding:0;border-width:2px;background:var(--paper)}
+.dot[aria-current="true"]{background:var(--sun);width:30px}
+.num{display:none;font-size:18px;font-weight:700}
+@media (max-width:640px){.dot{display:none}.num{display:block}#read{font-size:16px;padding:8px 12px}}
+.big{font-size:22px;padding:10px 22px}
+/* animations */
+.shake{animation:shake .5s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+.float{animation:float 3s ease-in-out infinite;transform-box:fill-box}
+@keyframes float{50%{transform:translateY(-8px)}}
+.fall{animation:fall 2.4s ease-in infinite;transform-box:fill-box}
+@keyframes fall{0%{transform:translateY(0);opacity:1}80%{opacity:1}100%{transform:translateY(120px);opacity:0}}
+.blink{animation:blink 1.2s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+.pop{animation:pop .5s ease-out}
+@keyframes pop{0%{transform:scale(.6)}70%{transform:scale(1.1)}100%{transform:scale(1)}}
+/* game */
+.game{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center}
+.seg{display:inline-flex;border:3px solid var(--ink);border-radius:999px;overflow:hidden}
+.seg button{border:0;border-radius:0;font-size:16px}
+.seg button[aria-pressed="true"]{background:var(--sun);color:#2b2340}
+.tapbtn{background:var(--good);color:#fff;border-color:#1b6e43;font-size:26px;padding:14px 34px}
+.tapbtn[disabled]{opacity:.4;cursor:not-allowed}
+.printnote{display:none}
+@page{size:A4 landscape;margin:10mm}
+@media print{
+  :root{--sky:#dff1ff;--paper:#fffaf0;--ink:#2b2340;--soft:#6c6485;--card:#fff;--grass:#8fd694;--robot:#9aa5b8}
+  html,body{height:auto;overflow:visible;background:var(--paper);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  *{animation:none!important;transition:none!important}
+  .book{position:static;display:block}.pages{overflow:visible}.bar{display:none}
+  .page{position:relative;inset:auto;opacity:1;visibility:visible;transform:none;overflow:visible;height:180mm;
+    justify-content:center;break-after:page;page-break-after:always}
+  .page:last-child{break-after:auto;page-break-after:auto}
+  .scene{width:min(240mm,100%);border-width:3px}
+  .words{font-size:24pt}.grown{font-size:10pt}
+  .game{display:none}.printnote{display:block;font-size:14pt;text-align:center}
+}
+</style>
+</head>
+<body>
+<div class="book">
+<div class="pages" id="pages"></div>
+<nav class="bar" aria-label="Turn the pages">
+  <button id="back" class="big" aria-label="Previous page">◀</button>
+  <div class="mid" id="dots"><span class="num" id="num"></span></div>
+  <button id="read" aria-label="Read this page aloud">🔊 Read to me</button>
+  <button id="fwd" class="big" aria-label="Next page">▶</button>
+</nav>
+</div>
+
+<script>
+// ---------- little drawings ----------
+const C = n => `var(--${n})`;
+function helper(x, y, color, mood = "happy", name = "", s = 1, extra = "") {
+  const mouth = mood === "happy" ? `<path d="M-14 10 Q0 24 14 10" stroke="#2b2340" stroke-width="4" fill="none" stroke-linecap="round"/>`
+    : mood === "sad" ? `<path d="M-14 20 Q0 6 14 20" stroke="#2b2340" stroke-width="4" fill="none" stroke-linecap="round"/>`
+    : mood === "tired" ? `<path d="M-12 16 L12 16" stroke="#2b2340" stroke-width="4" stroke-linecap="round"/>`
+    : `<circle cx="0" cy="15" r="6" fill="#2b2340"/>`;
+  const tear = mood === "sad" ? `<path d="M22 -2 q5 10 0 14 q-5 -4 0 -14z" fill="#5aa9ff"/>` : "";
+  const sweat = mood === "tired" ? `<path d="M-30 -20 q6 10 0 14 q-6 -4 0 -14z" fill="#5aa9ff"/><path d="M30 -24 q6 10 0 14 q-6 -4 0 -14z" fill="#5aa9ff"/>` : "";
+  return `<g transform="translate(${x} ${y}) scale(${s})">
+    <path d="M-34 95 Q-34 40 0 40 Q34 40 34 95 Z" fill="${color}" stroke="#2b2340" stroke-width="4"/>
+    <path d="M-34 60 L-56 30" stroke="${color}" stroke-width="14" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="36" fill="#ffe0bd" stroke="#2b2340" stroke-width="4"/>
+    <rect x="-34" y="-14" width="68" height="18" rx="9" fill="${color}" stroke="#2b2340" stroke-width="3"/>
+    <circle cx="-13" cy="-5" r="5" fill="#fff"/><circle cx="13" cy="-5" r="5" fill="#fff"/>
+    <circle cx="-13" cy="-5" r="2.5" fill="#2b2340"/><circle cx="13" cy="-5" r="2.5" fill="#2b2340"/>
+    ${mouth}${tear}${sweat}${extra}
+    ${name ? `<text x="0" y="122" text-anchor="middle" font-size="20" font-weight="700" fill="currentColor">${name}</text>` : ""}
+  </g>`;
+}
+function phone(x, y, state = "quiet", s = 1, label = "") {
+  const screen = state === "ring" ? "#ffc94a" : state === "gone" ? "#9aa5b8" : state === "open" ? "#ffe9a8" : state === "yes" ? "#8fe3b0" : "#cfd6e3";
+  const inner = state === "ring" ? `<text x="0" y="8" text-anchor="middle" font-size="26">🔔</text>`
+    : state === "gone" ? `<text x="0" y="8" text-anchor="middle" font-size="24">💨</text>`
+    : state === "open" ? `<text x="0" y="8" text-anchor="middle" font-size="22">⏳</text>`
+    : state === "yes" ? `<text x="0" y="8" text-anchor="middle" font-size="24">✅</text>`
+    : `<text x="0" y="8" text-anchor="middle" font-size="22">💤</text>`;
+  const waves = state === "ring" ? `<path d="M30 -30 q12 12 0 24 M40 -38 q20 20 0 40" stroke="#ffc94a" stroke-width="5" fill="none" stroke-linecap="round"/>` : "";
+  return `<g transform="translate(${x} ${y}) scale(${s})"><g class="${state === "ring" ? "shake" : ""}">
+    <rect x="-24" y="-40" width="48" height="80" rx="10" fill="#2b2340"/>
+    <rect x="-18" y="-32" width="36" height="58" rx="6" fill="${screen}"/>${inner}</g>${waves}
+    ${label ? `<text x="0" y="66" text-anchor="middle" font-size="18" font-weight="700" fill="currentColor">${label}</text>` : ""}</g>`;
+}
+function robot(x, y, s = 1, face = "ok") {
+  const eyes = face === "cross" ? `<path d="M-22 -8 l10 10 M-12 -8 l-10 10 M12 -8 l10 10 M22 -8 l-10 10" stroke="#2b2340" stroke-width="4" stroke-linecap="round"/>`
+    : `<circle cx="-17" cy="-3" r="7" fill="#2b2340"/><circle cx="17" cy="-3" r="7" fill="#2b2340"/>`;
+  return `<g transform="translate(${x} ${y}) scale(${s})">
+    <line x1="0" y1="-48" x2="0" y2="-30" stroke="#2b2340" stroke-width="4"/><circle cx="0" cy="-52" r="7" fill="#e5534b" class="blink"/>
+    <rect x="-42" y="-30" width="84" height="60" rx="14" fill="${C("robot")}" stroke="#2b2340" stroke-width="4"/>
+    ${eyes}<rect x="-16" y="12" width="32" height="7" rx="3" fill="#2b2340"/>
+    <rect x="-34" y="34" width="68" height="56" rx="12" fill="${C("robot")}" stroke="#2b2340" stroke-width="4"/>
+    <text x="0" y="70" text-anchor="middle" font-size="16" font-weight="700" fill="#2b2340">PICKER</text></g>`;
+}
+const star = (x, y, s = 1, cls = "", fill = "#ffc94a") => `<g transform="translate(${x} ${y}) scale(${s})"><path class="${cls}" d="M0 -20 L6 -6 L21 -6 L9 3 L13 18 L0 9 L-13 18 L-9 3 L-21 -6 L-6 -6 Z" fill="${fill}" stroke="#2b2340" stroke-width="3"/></g>`;
+const sun = `<circle cx="820" cy="70" r="40" fill="#ffc94a" class="float"/>`;
+const ground = `<rect x="0" y="420" width="960" height="120" fill="${C("grass")}"/>`;
+const houses = `<g opacity=".9"><rect x="40" y="300" width="110" height="120" fill="#ffd2a8" stroke="#2b2340" stroke-width="4"/><path d="M30 300 L95 240 L160 300Z" fill="#e5534b" stroke="#2b2340" stroke-width="4"/>
+  <rect x="780" y="290" width="130" height="130" fill="#cde3ff" stroke="#2b2340" stroke-width="4"/><path d="M770 290 L845 230 L920 290Z" fill="#7d6bd8" stroke="#2b2340" stroke-width="4"/></g>`;
+function clock(x, y, n, total, color = "#2fbf71", s = 1, text = "") {
+  const r = 46, frac = Math.min(1, n / total), a = frac * 2 * Math.PI - Math.PI / 2;
+  const large = frac > .5 ? 1 : 0, ex = r * Math.cos(a), ey = r * Math.sin(a);
+  const arc = frac >= 1 ? `<circle r="${r}" fill="${color}"/>` : `<path d="M0 0 L0 ${-r} A${r} ${r} 0 ${large} 1 ${ex.toFixed(1)} ${ey.toFixed(1)} Z" fill="${color}"/>`;
+  return `<g transform="translate(${x} ${y}) scale(${s})"><circle r="${r + 6}" fill="#fff" stroke="#2b2340" stroke-width="5"/>${arc}
+    <text y="${r + 34}" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor">${text}</text></g>`;
+}
+const svg = (inner, label) => `<svg viewBox="0 0 960 540" role="img" aria-label="${label}" style="color:var(--ink)"><title>${label}</title>${inner}</svg>`;
+
+// ---------- the story ----------
+const PAGES = [
+  { label: "A busy town with masked helpers", scene: svg(sun + houses + ground +
+      helper(300, 300, C("mite"), "happy", "Mite") + helper(480, 300, C("gale"), "happy", "Gale") + helper(660, 300, C("far"), "happy", "Farlight") +
+      `<text x="480" y="80" text-anchor="middle" font-size="48" font-weight="700" fill="currentColor">The Jedi Order Story</text>
+       <text x="480" y="125" text-anchor="middle" font-size="22" fill="currentColor">told by Yoda</text>`, "Mite, Gale and Farlight smiling in a sunny town"),
+    words: "Once upon a time, in a busy town, lived some <em>helpers</em> in masks.",
+    grown: "Rook Dispatch helps independent masked responders get to emergencies. This is the story of Release 4.2 and project Jedi Order." },
+
+  { label: "The Picker robot rings Mite's phone", scene: svg(sun + ground + robot(240, 250, 1.4) +
+      `<path d="M320 230 Q480 120 610 220" stroke="#ffc94a" stroke-width="6" fill="none" stroke-dasharray="14 10"/>` +
+      helper(700, 300, C("mite"), "happy", "Mite") + phone(620, 330, "ring", 1.1), "The Picker robot sends a ring to Mite's phone"),
+    words: "When someone needs help, the <em>Picker</em> robot rings a helper's phone. Ring ring!",
+    grown: "The routing code ranks free responders and pings them one at a time." },
+
+  { label: "Mite has time to count to 90", scene: svg(ground + helper(250, 300, C("mite"), "happy", "Mite") + phone(360, 330, "yes", 1.1) +
+      clock(650, 230, 90, 90, "#2fbf71", 1.6, "Count to 90!") + star(820, 110, 1.6, "float"), "Mite answers the phone before the count of 90 and earns a star"),
+    words: "Mite had time to count all the way to <em>90</em>. Plenty of time! Mite said yes and got a star.",
+    grown: "Before 4.2 the ping wait was 90 seconds. Only about 2 in every 100 pings were missed." },
+
+  { label: "Someone made the counting shorter", scene: svg(ground + clock(320, 230, 90, 90, "#2fbf71", 1.5, "Before: 90") +
+      `<text x="480" y="250" text-anchor="middle" font-size="70" fill="currentColor">➜</text>` + clock(640, 230, 60, 90, "#e5534b", 1.5, "Now: 60"),
+    "A big counting clock of 90 becomes a smaller clock of 60"),
+    words: "One day, someone made the counting <em>shorter</em>. Only 60!",
+    grown: "Release 4.2 (12 August) cut the ping wait from 90 to 60 seconds." },
+
+  { label: "Mite is on the stairs putting on a boot and the ring disappears", scene: svg(ground +
+      `<path d="M120 420 L120 360 L200 360 L200 300 L280 300 L280 240 L360 240 L360 420Z" fill="#d9c7a7" stroke="#2b2340" stroke-width="4"/>` +
+      helper(300, 150, C("mite"), "surprised", "", 0.9, `<text x="-60" y="110" font-size="40">👢</text>`) +
+      phone(620, 300, "gone", 1.4) + `<text x="700" y="200" font-size="28" font-weight="700" fill="currentColor">Gone!</text>` +
+      clock(820, 120, 60, 60, "#e5534b", 0.8, ""), "Mite on the stairs with one boot on while the phone ring disappears"),
+    words: "Mite was on the stairs, putting on a boot… by the time Mite grabbed the phone, the ring was <em>gone</em>!",
+    grown: "Some responders need a little over a minute. Missed pings jumped from 2% to 18% on the day 4.2 shipped." },
+
+  { label: "The robot takes away Mite's star", scene: svg(ground + robot(260, 240, 1.4, "cross") +
+      `<g transform="translate(260 120)"><rect x="-120" y="-50" width="240" height="56" rx="16" fill="#fff" stroke="#2b2340" stroke-width="4"/><text y="-14" text-anchor="middle" font-size="24" font-weight="700" fill="#2b2340">"Mite said NO!"</text></g>` +
+      helper(680, 300, C("mite"), "sad", "Mite") + star(680, 150, 1.4, "fall"), "The robot wrongly thinks Mite said no and a star falls away"),
+    words: "The Picker robot got mixed up. It thought Mite said <em>no</em>, and took away a star.",
+    grown: "The code scores a missed ping exactly like a turned-down one: −0.12. A yes only earns +0.08." },
+
+  { label: "The stars never come back", scene: svg(ground +
+      `<g transform="translate(160 120)">${[0,1,2,3,4].map(i => `<g transform="translate(${i * 70} 0)">${star(0, 0, 1.3, "", i < 1 ? "#ffc94a" : "#e9e4f5")}</g>`).join("")}</g>` +
+      `<text x="300" y="210" text-anchor="middle" font-size="26" font-weight="700" fill="currentColor">Mite's star chart</text>` +
+      helper(720, 300, C("mite"), "sad", "Mite") + phone(830, 330, "quiet", 1), "Mite's star chart is almost empty and Mite's phone is quiet"),
+    words: "Fewer stars meant fewer rings. And the stars <em>never</em> came back on their own. Mite's phone went quiet.",
+    grown: "The score never recovers over time. A low score means fewer pings, so fewer chances to win it back." },
+
+  { label: "Four helpers go quiet while Gale is too busy", scene: svg(ground +
+      helper(120, 300, C("mite"), "sad", "Mite", .85) + helper(250, 300, C("far"), "sad", "Farlight", .85) +
+      helper(380, 300, C("und"), "sad", "Undertow", .85) + helper(510, 300, C("ves"), "sad", "Vesper", .85) +
+      phone(120, 190, "quiet", .7) + phone(250, 190, "quiet", .7) + phone(380, 190, "quiet", .7) + phone(510, 190, "quiet", .7) +
+      helper(780, 300, C("gale"), "tired", "Gale") + phone(700, 170, "ring", .8) + phone(790, 140, "ring", .8) + phone(870, 180, "ring", .8),
+      "Four sad helpers with quiet phones, and Gale tired with three ringing phones"),
+    words: "Four helpers stopped getting rings. And Gale got <em>so many</em> rings, Gale got tired!",
+    grown: "Farlight, The Undertow, Vesper and Meteor Mite went from about 12 pings a week to about 1. The Gale went from 13 to 21." },
+
+  { label: "Yoda looks at the clues", scene: svg(ground +
+      `<g transform="translate(250 290)"><ellipse cx="0" cy="40" rx="50" ry="60" fill="#8fbf6a" stroke="#2b2340" stroke-width="4"/>
+        <circle cx="0" cy="-30" r="44" fill="#9fd07a" stroke="#2b2340" stroke-width="4"/>
+        <path d="M-40 -40 L-100 -60 L-44 -18Z M40 -40 L100 -60 L44 -18Z" fill="#9fd07a" stroke="#2b2340" stroke-width="4"/>
+        <circle cx="-15" cy="-34" r="6" fill="#2b2340"/><circle cx="15" cy="-34" r="6" fill="#2b2340"/><path d="M-12 -10 Q0 0 12 -10" stroke="#2b2340" stroke-width="4" fill="none"/>
+        <text x="0" y="132" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor">Yoda</text></g>` +
+      `<g transform="translate(420 140)"><circle cx="0" cy="0" r="40" fill="none" stroke="#2b2340" stroke-width="8"/><line x1="28" y1="28" x2="70" y2="70" stroke="#2b2340" stroke-width="12" stroke-linecap="round"/></g>` +
+      `<g transform="translate(560 120)"><rect width="300" height="200" rx="16" fill="#fff" stroke="#2b2340" stroke-width="4"/>
+        <polyline points="20,170 60,168 100,169 140,167 180,168 200,60 240,90 280,110" fill="none" stroke="#e5534b" stroke-width="6"/>
+        <text x="150" y="30" text-anchor="middle" font-size="20" font-weight="700" fill="#2b2340">Missed rings 📈</text></g>`,
+      "Yoda the detective with a magnifying glass, looking at a chart that jumps up"),
+    words: "Then <em>Yoda</em> came along, like a detective, and looked at all the clues.",
+    grown: "Six modules of work: the wiki, the tickets and interviews, the pings data, and the routing code." },
+
+  { label: "Yoda's fix: the ring stays, late is not no, and stars come back", scene: svg(sun + ground +
+      phone(170, 230, "open", 1.4) + `<text x="170" y="350" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor">Ring stays!</text>` +
+      `<g transform="translate(470 230)"><circle r="62" fill="#fff" stroke="#2b2340" stroke-width="5"/><text y="-6" text-anchor="middle" font-size="22" font-weight="700" fill="#2b2340">Late</text><text y="22" text-anchor="middle" font-size="22" font-weight="700" fill="#2b2340">≠ No</text></g>` +
+      `<text x="470" y="350" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor">No more mix-ups!</text>` +
+      star(720, 190, 1.2, "pop") + star(790, 230, 1.2, "pop") + star(860, 190, 1.2, "pop") +
+      `<text x="790" y="350" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor">Stars for everyone!</text>`,
+      "Three ideas: the ring stays open, late is not the same as no, and everyone gets their stars back"),
+    words: "Yoda's fix: the ring <em>stays</em> a little longer, being late isn't saying no, and everyone gets their stars back!",
+    grown: "The brief: the ping stays open after 60s (first yes wins), a late answer isn't penalized, and every score gets one fresh start." },
+
+  { label: "Play the game: tap Take in time", game: true,
+    words: "Your turn! Ring ring! Can you help Mite tap <em>Take</em>?",
+    grown: "Try both rules. Old rule: the ring vanishes at 60 and Mite loses a star. Yoda's rule: it stays open, and even a late tap counts." },
+
+  { label: "Kip gets a note and Mite feels remembered", scene: svg(sun + ground +
+      helper(250, 300, C("kip"), "happy", "Kip") +
+      `<g transform="translate(330 110)"><rect width="250" height="110" rx="16" fill="#fff" stroke="#2b2340" stroke-width="4"/>
+        <text x="20" y="42" font-size="20" font-weight="700" fill="#2b2340">📩 Mite was late,</text><text x="20" y="76" font-size="20" font-weight="700" fill="#2b2340">not saying no!</text></g>` +
+      helper(720, 300, C("mite"), "happy", "Mite") + phone(810, 330, "yes", 1) +
+      `<text x="720" y="170" text-anchor="middle" font-size="40">💛</text>`, "Kip reads a note explaining why, and Mite is happy again"),
+    words: "Kip, who looks after Mite, gets a little note that says <em>why</em>. Mite knows nobody forgot.",
+    grown: "Kip's console gets a quiet-responder alert with the reason. Mite's phone says: your standing has been reset." },
+
+  { label: "Yoda's helpers: a checklist friend and a Monday owl", scene: svg(ground +
+      `<g transform="translate(260 260)"><rect x="-90" y="-120" width="180" height="230" rx="18" fill="#fff" stroke="#2b2340" stroke-width="5"/>
+        ${["Who?","Did it work?","Same plan?","Problem first?"].map((t, i) => `<text x="-70" y="${-70 + i * 50}" font-size="22" fill="#2b2340">✅ ${t}</text>`).join("")}
+        <text x="0" y="150" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor">Checklist friend</text></g>` +
+      `<g transform="translate(680 240)" class="float"><ellipse cx="0" cy="20" rx="70" ry="80" fill="#a0784f" stroke="#2b2340" stroke-width="5"/>
+        <circle cx="-28" cy="-10" r="26" fill="#fff" stroke="#2b2340" stroke-width="4"/><circle cx="28" cy="-10" r="26" fill="#fff" stroke="#2b2340" stroke-width="4"/>
+        <circle cx="-28" cy="-10" r="10" fill="#2b2340"/><circle cx="28" cy="-10" r="10" fill="#2b2340"/><path d="M-8 14 L0 28 L8 14Z" fill="#ffc94a"/>
+        <text x="0" y="135" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor">Monday owl 📅</text></g>`,
+      "A checklist with four ticks, and an owl that watches every Monday"),
+    words: "Yoda made two helpers: a <em>checklist friend</em> that checks every plan, and a <em>Monday owl</em> that watches the numbers every week.",
+    grown: "The review-checklist and fix-brief skills check every brief before it ships. The weekly-trends skill runs every Monday, and would have flagged 4.2 in week one." },
+
+  { label: "Everyone is happy and the phones ring again", scene: svg(sun + houses + ground +
+      helper(150, 300, C("mite"), "happy", "Mite", .85) + helper(290, 300, C("far"), "happy", "Farlight", .85) + helper(430, 300, C("und"), "happy", "Undertow", .85) +
+      helper(570, 300, C("ves"), "happy", "Vesper", .85) + helper(710, 300, C("gale"), "happy", "Gale", .85) +
+      star(150, 150, 1, "pop") + star(290, 150, 1, "pop") + star(430, 150, 1, "pop") + star(570, 150, 1, "pop") + star(710, 150, 1, "pop") +
+      `<text x="480" y="80" text-anchor="middle" font-size="54" font-weight="700" fill="currentColor">The End 🌟</text>`, "All five helpers smiling with stars"),
+    words: "And everyone got rings again, and nobody was too tired. <em>The end!</em>",
+    grown: "Next: Helen approves the fix; Wen and Marcus roll it out to one region; the Monday report checks AC1–AC9 until they all pass four weeks in a row." },
+];
+
+// ---------- build pages ----------
+const pagesEl = document.getElementById("pages"), dotsEl = document.getElementById("dots");
+PAGES.forEach((p, i) => {
+  const sec = document.createElement("section");
+  sec.className = "page"; sec.setAttribute("aria-label", `Page ${i + 1}: ${p.label}`);
+  sec.innerHTML = (p.game ? `<div class="scene" id="game-scene"></div>
+      <div class="game"><div class="seg" role="group" aria-label="Which rule">
+        <button id="g-old" aria-pressed="false">Old rule</button><button id="g-new" aria-pressed="true">Yoda's rule</button></div>
+        <button id="g-ring" class="big">🔔 Ring Mite</button><button id="g-take" class="tapbtn" disabled>Take!</button></div>
+      <p class="printnote">🎮 Open <b>final-report-storybook.html</b> in a browser to play this page.</p>`
+      : `<div class="scene">${p.scene}</div>`) +
+    `<p class="words">${p.words}</p><p class="grown"><b>For grown-ups:</b> ${p.grown}</p>`;
+  pagesEl.appendChild(sec);
+  const d = document.createElement("button"); d.className = "dot";
+  d.setAttribute("aria-label", `Go to page ${i + 1}`); d.onclick = () => go(i); dotsEl.appendChild(d);
+});
+const pages = [...pagesEl.children];
+let cur = 0;
+function go(i) {
+  i = Math.max(0, Math.min(pages.length - 1, i));
+  try { speechSynthesis.cancel(); } catch (e) {}
+  pages.forEach((p, j) => { p.classList.toggle("on", j === i); p.setAttribute("aria-hidden", j !== i); });
+  [...dotsEl.querySelectorAll(".dot")].forEach((d, j) => d.setAttribute("aria-current", j === i));
+  document.getElementById("num").textContent = `${i + 1} / ${pages.length}`;
+  document.getElementById("back").disabled = i === 0;
+  document.getElementById("fwd").disabled = i === pages.length - 1;
+  cur = i;
+}
+document.getElementById("back").onclick = () => go(cur - 1);
+document.getElementById("fwd").onclick = () => go(cur + 1);
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight") go(cur + 1);
+  if (e.key === "ArrowLeft") go(cur - 1);
+});
+let tx = null;
+pagesEl.addEventListener("touchstart", e => { tx = e.touches[0].clientX; }, { passive: true });
+pagesEl.addEventListener("touchend", e => { if (tx === null) return; const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 60) go(cur + (dx < 0 ? 1 : -1)); tx = null; });
+document.getElementById("read").onclick = () => {
+  try {
+    speechSynthesis.cancel();
+    const text = pages[cur].querySelector(".words").textContent;
+    const u = new SpeechSynthesisUtterance(text); u.rate = 0.85; u.pitch = 1.15; speechSynthesis.speak(u);
+  } catch (e) { alert("Reading aloud isn't available in this browser."); }
+};
+
+// ---------- the game ----------
+let rule = "new", g = { t: 0, phase: "idle", stars: 3 }, gt = null;
+function gameDraw() {
+  const { t, phase, stars } = g;
+  let ph = "quiet", msg = "Tap 🔔 to ring Mite's phone!", mood = "happy", gale = "";
+  if (phase === "ring") { ph = "ring"; msg = `Counting… ${t}`; mood = "surprised"; }
+  if (phase === "open") { ph = "open"; msg = `Still open! ${t}… Gale is asked too`; mood = "surprised"; gale = helper(820, 300, C("gale"), "happy", "Gale", .7) + phone(880, 190, "ring", .7); }
+  if (phase === "yes") { ph = "yes"; msg = t > 60 ? "Late, but it counts! ⭐ +1" : "Yes! ⭐ +1"; }
+  if (phase === "gone") { ph = "gone"; msg = "Too late! The ring is gone, and a star fell off 😢"; mood = "sad"; }
+  if (phase === "covered") { ph = "quiet"; msg = "Gale helped! Mite didn't lose a star 💛"; gale = helper(820, 300, C("gale"), "happy", "Gale", .7); }
+  const limit = rule === "new" ? 90 : 60;
+  const starsRow = Array.from({ length: 6 }, (_, i) => `<g transform="translate(${70 + i * 60} 70)">${star(0, 0, 1, phase === "gone" && i === stars ? "fall" : "", i < stars ? "#ffc94a" : "#e9e4f5")}</g>`).join("");
+  document.getElementById("game-scene").innerHTML = svg(ground + starsRow +
+    helper(380, 300, C("mite"), mood, "Mite") + phone(500, 320, ph, 1.3) +
+    clock(700, 180, Math.min(t, limit), limit, t >= 60 && rule === "new" ? "#ffc94a" : "#2fbf71", 1.1, rule === "new" ? "Yoda's rule" : "Old rule: 60") +
+    `<text x="480" y="500" text-anchor="middle" font-size="28" font-weight="700" fill="currentColor">${msg}</text>` + gale,
+    "Game: Mite's phone, a counting clock and Mite's stars");
+  const live = phase === "ring" || phase === "open";
+  document.getElementById("g-take").disabled = !live;
+  document.getElementById("g-ring").disabled = live;
+}
+function gStart() {
+  if (g.phase === "ring" || g.phase === "open") return;
+  g.t = 0; g.phase = "ring"; clearInterval(gt);
+  gt = setInterval(() => {
+    g.t++;
+    if (g.t === 60 && g.phase === "ring") {
+      if (rule === "old") { g.phase = "gone"; g.stars = Math.max(0, g.stars - 1); clearInterval(gt); }
+      else g.phase = "open";
+    }
+    if (g.t >= 90 && g.phase === "open") { g.phase = "covered"; clearInterval(gt); }
+    gameDraw();
+  }, 100);
+  gameDraw();
+}
+function gTake() {
+  if (!(g.phase === "ring" || g.phase === "open")) return;
+  g.phase = "yes"; g.stars = Math.min(6, g.stars + 1); clearInterval(gt); gameDraw();
+}
+function gRule(r) {
+  rule = r; clearInterval(gt); g = { t: 0, phase: "idle", stars: 3 };
+  document.getElementById("g-old").setAttribute("aria-pressed", r === "old");
+  document.getElementById("g-new").setAttribute("aria-pressed", r === "new");
+  gameDraw();
+}
+document.getElementById("g-ring").onclick = gStart;
+document.getElementById("g-take").onclick = gTake;
+document.getElementById("g-old").onclick = () => gRule("old");
+document.getElementById("g-new").onclick = () => gRule("new");
+gameDraw();
+// "?shot#5" opens page 5 without the page-turn bar (used to make the PDF).
+if (location.search.includes("shot")) {
+  document.querySelector(".bar").style.display = "none";
+  document.documentElement.setAttribute("data-theme", "light");
+  g = { t: 70, phase: "open", stars: 3 }; gameDraw();
+}
+const startPage = parseInt((location.hash || "").slice(1), 10);
+go(Number.isFinite(startPage) ? startPage - 1 : 0);
+</script>
+</body>
+</html>
