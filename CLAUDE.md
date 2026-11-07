@@ -198,3 +198,7 @@ Session notes (Module 5, 7 Nov 2026):
 - Prototypes: `prototype.html` (console + phone) and `prototype-mobile.html` (tabs), each with a 4.2-today toggle and an
   "All responders" travel-time view (made-up minutes). Open: may a handler see other handlers' responders? Travel time
   only, no locations.
+- Later in Module 5: the dispatcher views got a pings chart (real taken/turned down/missed counts per responder since
+  4.2) and a combined distance + pings view. It shows Meteor Mite is nearest (9 min) but missed 8 of 14. There's
+  also a two-window version: `dispatcher.html` (runs the clock and rules) and `responder.html` (Mite's phone), synced
+  across windows. It was tested through a local server, not by double-clicking the files. `.claude/launch.json` starts it.

@@ -41,3 +41,15 @@ build me a mobile version that i can click
 ### 7.
 
 Let the dispatcher have the ability to see all responders and the distance of each responder from the location
+
+### 8.
+
+for the dispatcher view can we see a graph of the pinges they accepted declined and missed
+
+### 9.
+
+Build a combined view of distances and ping charts
+
+### 10.
+
+give me 2 different browser windows for dispatcher and responder instead of one
