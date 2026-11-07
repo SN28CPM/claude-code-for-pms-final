@@ -182,3 +182,19 @@ Session notes (Module 4, 31 Oct 2026):
   burnout risk). Still diverging at 31 Aug, so not seasonal. No trend by incident type (all 20 rose).
 - Recovery from 0 needs ~7 takes in a row (about 2 months at 1 ping/wk). Open: do restarts wipe scores, and do handler
   overrides (4.0 audit log) bypass or affect scoring? Ask Wen/Marcus.
+
+Session notes (Module 5, 7 Nov 2026):
+- `05-super-speed/brief.md` is the solution brief for Helen. It keeps the 60s ping wait: the ping stays open up to 3 min,
+  a late take counts, "covered" is free, any no costs −0.12, and there's a one-time fresh start (all scores to 0.5).
+  It also covers the responder and Kip views. Helen picks between this and going back to 90s plus a fresh start.
+- Stress test (`00-rook/test-data/routing/stress_test.py`, 20 seeds, 4.1 → 4.2 → fix): no fix works without a fresh
+  start (90s alone gives 2.2/wk). With a fresh start, the proposal gives 19.2/wk and 90s gives 15.6/wk. Both fill in
+  ~50s. The proposal still works if answers take 100s+, where 90s collapses. That is the case for keeping 60s.
+- Costs: acceptance per ping drops ~79% → 65% (needs a "covered" outcome from Ravi), and time-to-accept goes 29 → 42s,
+  which breaks requirement B3 as written. The busiest responders aren't relieved. Ease-back was dropped (it lets
+  disengaged responders creep back). Late-no loophole closed. `test_rules.py` has 12 rule checks.
+- Kip handles Meteor Mite (quiet) and The Gale (13 → 21/wk). The Undertow is Desmond Okafor's, Vesper is Aunt Dot's,
+  Farlight is Linda Pruitt's.
+- Prototypes: `prototype.html` (console + phone) and `prototype-mobile.html` (tabs), each with a 4.2-today toggle and an
+  "All responders" travel-time view (made-up minutes). Open: may a handler see other handlers' responders? Travel time
+  only, no locations.

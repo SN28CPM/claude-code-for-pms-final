@@ -16,6 +16,28 @@ prompt library built from your own questions.
 
 ### 1.
 
+Can you create a solution brief to fix the issue while keeping the 60s response time?
+
 ### 2.
 
+check the brief for anything that can be done better. and also are there any obvious misses?
+
 ### 3.
+
+test it more thoroughly covering all the scenarios
+
+### 4.
+
+Are all helens requirements covered in the brief
+
+### 5.
+
+can we create a visual representation of the brief
+
+### 6.
+
+build me a mobile version that i can click
+
+### 7.
+
+Let the dispatcher have the ability to see all responders and the distance of each responder from the location
