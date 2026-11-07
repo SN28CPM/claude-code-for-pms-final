@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dispatcher Window</title>
+<style>
+:root{
+  --bg:#f4f3ef;--surface:#ffffff;--surface-2:#faf9f6;--ink:#1b1b19;--ink-2:#55544f;--muted:#8a8982;
+  --line:rgba(0,0,0,.10);--accent:#2a63c7;--accent-bg:#e7effb;--danger:#b4322f;--danger-bg:#fbeaea;
+  --warn:#8a5a06;--warn-bg:#fbf0db;--ok:#1d7a4f;--ok-bg:#e3f4ea;--phone:#121212;--phone-ink:#f2f2ef;--phone-card:#24242a;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141413;--surface:#1e1e1c;--surface-2:#252523;--ink:#efeee9;--ink-2:#c3c2b7;--muted:#8a8982;
+  --line:rgba(255,255,255,.12);--accent:#7aa7f0;--accent-bg:#1d2a40;--danger:#f08b88;--danger-bg:#3a1f1f;
+  --warn:#f1c26b;--warn-bg:#3a2e17;--ok:#7fd3a6;--ok-bg:#183326;--phone:#000;--phone-card:#1c1c21;}}
+:root[data-theme="dark"]{
+  --bg:#141413;--surface:#1e1e1c;--surface-2:#252523;--ink:#efeee9;--ink-2:#c3c2b7;--muted:#8a8982;
+  --line:rgba(255,255,255,.12);--accent:#7aa7f0;--accent-bg:#1d2a40;--danger:#f08b88;--danger-bg:#3a1f1f;
+  --warn:#f1c26b;--warn-bg:#3a2e17;--ok:#7fd3a6;--ok-bg:#183326;--phone:#000;--phone-card:#1c1c21;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px}
+button:hover{border-color:var(--ink-2)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button[disabled]{opacity:.45;cursor:not-allowed}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 40px}
+header.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+h1{font-size:20px;font-weight:600;margin:0}
+.sub{color:var(--ink-2);font-size:13px;margin:2px 0 0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;border-radius:0;padding:8px 14px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:16px}
+.controls .hint{color:var(--ink-2);font-size:13px;flex:1 1 220px}
+.grid{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1fr);gap:16px}
+.conn{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px}
+.conn .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px}
+/* console */
+.console{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.c-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface-2);font-size:13px}
+.c-bar b{font-weight:600}
+.c-body{display:grid;grid-template-columns:200px minmax(0,1fr)}
+@media (max-width:560px){.c-body{grid-template-columns:minmax(0,1fr)}}
+.roster{border-right:1px solid var(--line);padding:8px}
+@media (max-width:560px){.roster{border-right:0;border-bottom:1px solid var(--line)}}
+.who{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;border:0;background:none;padding:10px;border-radius:8px;margin-bottom:4px}
+.who[aria-current="true"]{background:var(--accent-bg)}
+.who small{display:block;color:var(--muted);font-size:12px}
+.badge{font-size:11px;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.b-danger{background:var(--danger-bg);color:var(--danger)}.b-warn{background:var(--warn-bg);color:var(--warn)}
+.b-ok{background:var(--ok-bg);color:var(--ok)}.b-accent{background:var(--accent-bg);color:var(--accent)}.b-muted{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+.detail{padding:14px 16px}
+.detail h2{font-size:17px;margin:0 0 2px;font-weight:600}
+.alert{border:1px solid var(--line);border-left:4px solid var(--danger);border-radius:0 8px 8px 0;padding:10px 12px;margin:12px 0;background:var(--danger-bg)}
+.alert.none{border-left-color:var(--muted);background:var(--surface-2)}
+.alert p{margin:4px 0}
+.k{color:var(--ink-2)}
+.week{display:flex;gap:4px;margin:6px 0 2px}
+.day{flex:1;height:26px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted)}
+.day.t{background:var(--ok-bg);color:var(--ok);border-color:transparent}.day.m{background:var(--warn-bg);color:var(--warn);border-color:transparent}.day.d{background:var(--danger-bg);color:var(--danger);border-color:transparent}
+.live{margin-top:14px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.live-h{display:flex;justify-content:space-between;padding:8px 12px;background:var(--surface-2);font-size:13px;border-bottom:1px solid var(--line)}
+.q{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line);font-size:14px}
+.q:last-child{border-bottom:0}
+.empty{padding:12px;color:var(--muted);font-size:13px}
+.tools{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+.tools button{padding:5px 10px;font-size:13px}
+.tools button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.rlist{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.rrow{display:grid;grid-template-columns:minmax(0,1fr) 92px 110px;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);font-size:14px}
+.rrow:last-child{border-bottom:0}
+.rrow.off{color:var(--muted)}
+.rrow small{display:block;color:var(--muted);font-size:12px}
+.dist{display:flex;flex-direction:column;gap:3px;font-variant-numeric:tabular-nums}
+.dbar{height:5px;border-radius:3px;background:var(--surface-2);overflow:hidden}
+.dbar i{display:block;height:100%;background:var(--accent)}
+.rrow .badge{justify-self:end}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--ink-2);margin:4px 0 8px}
+.legend span{display:flex;align-items:center;gap:5px}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.c-take{background:#1f9d5c}.c-no{background:#d4534f}.c-miss{background:#e8a93a}
+.crow{display:grid;grid-template-columns:130px minmax(0,1fr) 44px;gap:8px;align-items:center;padding:5px 0;font-size:13px}
+.crow .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stack{display:flex;height:18px;gap:2px}
+.stack i{display:block;height:100%;font-style:normal;font-size:11px;color:#fff;text-align:center;line-height:18px;overflow:hidden;min-width:2px}
+.stack i:first-child{border-radius:3px 0 0 3px}.stack i:last-child{border-radius:0 3px 3px 0}
+.crow .tot{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.detail{container-type:inline-size}
+.brow{display:grid;grid-template-columns:minmax(0,1fr) 84px 110px;gap:6px 10px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line);font-size:14px}
+.brow .stackcell{grid-column:1 / -1;grid-row:2}
+.brow:last-child{border-bottom:0}
+.brow.off{color:var(--muted)}
+.brow small{display:block;color:var(--muted);font-size:12px}
+.brow .badge{justify-self:end}
+.bhead{font-size:12px;color:var(--muted);background:var(--surface-2)}
+.bhead .stackcell{display:none}
+@container (min-width:720px){
+  .brow{grid-template-columns:minmax(0,1fr) 84px minmax(0,1.6fr) 110px}
+  .brow .stackcell{grid-column:3;grid-row:1}
+  .bhead .stackcell{display:block}
+}
+/* phone */
+.phone{width:300px;max-width:100%;margin:0 auto;background:var(--phone);border-radius:38px;padding:14px;box-shadow:0 0 0 1px var(--line)}
+.screen{background:linear-gradient(#2a2d3a,#15161c);border-radius:28px;min-height:520px;padding:14px 12px;color:var(--phone-ink);display:flex;flex-direction:column;gap:10px;position:relative}
+.status{display:flex;justify-content:space-between;font-size:12px;opacity:.8;padding:0 6px}
+.clock{text-align:center;font-size:44px;font-weight:300;margin:6px 0 2px;letter-spacing:-1px}
+.date{text-align:center;font-size:13px;opacity:.75;margin-bottom:6px}
+.note{background:var(--phone-card);border-radius:16px;padding:12px;font-size:14px;line-height:1.4}
+.note .app{font-size:11px;opacity:.7;display:flex;justify-content:space-between;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.note b{font-weight:600}
+.note .row{display:flex;gap:8px;margin-top:10px}
+.note .row button{flex:1;border:0;padding:10px;border-radius:12px;font-weight:600}
+.btn-take{background:#2fbf71;color:#04210f}.btn-no{background:#3a3a42;color:#f2f2ef}
+.ring{height:6px;border-radius:3px;background:#3a3a42;overflow:hidden;margin-top:8px}
+.ring i{display:block;height:100%;background:#f2b84b;width:100%;transition:width .1s linear}
+.note.ringing{outline:2px solid #f2b84b}
+.note.late{outline:2px dashed #f2b84b}
+.note.good{outline:2px solid #2fbf71}
+.note.quiet{opacity:.85}
+.shake{animation:shake .4s ease-in-out 3}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+@media (prefers-reduced-motion: reduce){.shake{animation:none}.ring i{transition:none}}
+.behind{margin-top:16px;background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:12px 14px;font-size:13px}
+.meter{height:10px;border-radius:5px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden;margin:6px 0}
+.meter i{display:block;height:100%;background:var(--accent);transition:width .4s}
+.log{margin:8px 0 0;padding-left:18px;color:var(--ink-2)}
+.log li{margin:2px 0}
+.foot{color:var(--muted);font-size:12px;margin-top:18px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Dispatcher: Kip's console</h1>
+      <p class="sub">Meteor Mite's phone runs in a separate window. Made-up data. Time runs 10× fast.</p>
+    </div>
+    <div class="seg" role="group" aria-label="Which rules to show">
+      <button id="m-prop" aria-pressed="true">Proposal</button>
+      <button id="m-v42" aria-pressed="false">4.2 today</button>
+    </div>
+  </header>
+
+  <div class="controls">
+    <button class="primary" id="start">▶ Send a callout to Meteor Mite</button>
+    <button id="skip" disabled>Skip to 60s</button>
+    <button id="reset">Start over</button>
+    <button id="open-resp">📱 Open responder window</button>
+    <span class="hint" id="hint">Press "Send a callout", then try tapping <b>Take</b> after the first minute.</span>
+  </div>
+
+  <div class="grid">
+    <section aria-label="Handler console">
+      <p class="label">Where Kip works: Dispatch console</p>
+      <div class="console">
+        <div class="c-bar"><span><b>Dispatch</b> · My responders</span><span class="k">Kip · Eastgate</span></div>
+        <div class="c-body">
+          <nav class="roster" aria-label="Kip's responders">
+            <button class="who" data-who="mite" aria-current="true"><span>Meteor Mite<small id="mite-sub">1 ping in 7 days</small></span><span class="badge b-danger" id="mite-badge">Quiet</span></button>
+            <button class="who" data-who="gale" aria-current="false"><span>The Gale<small>21 pings this week</small></span><span class="badge b-warn">Busy</span></button>
+            <button class="who" data-who="all" aria-current="false"><span>All responders<small>Distance to this callout</small></span><span class="badge b-muted">16</span></button>
+          </nav>
+          <div class="detail" id="detail" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Responder window">
+      <p class="label">Responder window</p>
+      <div class="conn">
+        <div class="row"><b>Meteor Mite's phone</b><span class="badge b-muted" id="conn">Not open</span></div>
+        <p class="k" style="font-size:13px;margin:8px 0 0" id="conn-help">Press "📱 Open responder window". Put the two windows side by side, then send a callout from here and answer it there.</p>
+      </div>
+      <div class="behind">
+        <b>Behind the scenes</b> <span class="k">(not shown to handlers or responders)</span>
+        <div style="display:flex;justify-content:space-between;margin-top:6px"><span>Meteor Mite's "said yes lately" score</span><b id="score-num">0.50</b></div>
+        <div class="meter"><i id="score-bar" style="width:50%"></i></div>
+        <ol class="log" id="log"></ol>
+      </div>
+    </section>
+  </div>
+  <p class="foot">Prototype for Helen Achebe, 7 Nov 2026. Rules match 05-super-speed/brief.md: the next person is asked at 60s, the ping stays open up to 3 minutes, a late take counts, "covered" costs nothing, and any no costs 0.12. In "4.2 today", the ping vanishes at 60s and counts as a no.</p>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const TICK_MS = 100;            // 1 simulated second = 0.1 real seconds
+const GALE_ANSWERS_AFTER = 30;  // The Gale says yes 30s after being asked
+let mode = "proposal", view = "mite", timer = null;
+let s;
+
+function fresh() {
+  s = { t: 0, phase: "idle", score: mode === "proposal" ? 0.5 : 0.0, launchSeen: mode !== "proposal",
+        galeAskedAt: null, offered: 3, turned: 1, missed: 1, queue: [], log: [],
+        days: ["m","","d","","m","",""] };
+  if (mode === "proposal") s.log.push("Launch day: every score reset to 0.50.");
+  else s.log.push("Score is at the floor (0.00) after weeks of missed pings.");
+}
+
+function fmtClock(t) { const m = 2 + Math.floor(t / 60), sec = t % 60; return `14:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`; }
+
+function setScore(delta, why) {
+  s.score = Math.max(0, Math.min(1, +(s.score + delta).toFixed(2)));
+  s.log.push(`${why} (${delta > 0 ? "+" : ""}${delta.toFixed(2)} → ${s.score.toFixed(2)})`);
+}
+
+function start() {
+  if (s.phase !== "idle" && !["taken","covered","declined","gone"].includes(s.phase)) return;
+  s.t = 0; s.phase = "ringing"; s.galeAskedAt = null; s.offered++;
+  s.queue = [{ who: "Meteor Mite", note: "Asked · waiting", cls: "b-accent" }];
+  s.log.push("Callout in Eastgate. Meteor Mite is closest, so is asked first.");
+  clearInterval(timer); timer = setInterval(tick, TICK_MS);
+  render(true);
+}
+
+function askGale() {
+  s.galeAskedAt = s.t;
+  s.queue.push({ who: "The Gale", note: `Asked at ${s.t}s`, cls: "b-accent" });
+}
+
+function finishGale() {
+  const g = s.queue.find(q => q.who === "The Gale"); g.note = "Took it"; g.cls = "b-ok";
+  const m = s.queue[0];
+  if (s.phase === "ringing" || s.phase === "late") {
+    s.phase = "covered"; m.note = "Covered · no change"; m.cls = "b-muted";
+    s.log.push("The Gale took it first. Meteor Mite: covered, score unchanged.");
+  } else if (s.phase === "gone") {
+    s.log.push("The Gale took it.");
+  }
+  stop();
+}
+
+function tick() {
+  s.t++;
+  if (s.t === 60 && (s.phase === "ringing")) {
+    if (mode === "proposal") {
+      s.phase = "late"; s.queue[0].note = "Still open"; s.queue[0].cls = "b-warn";
+      s.log.push("60s: no answer yet. The Gale is asked too; Mite's ping stays open.");
+    } else {
+      s.phase = "gone"; s.missed++; s.days[6] = "m";
+      s.queue[0].note = "Missed"; s.queue[0].cls = "b-danger";
+      setScore(-0.12, "60s: no answer. Ping withdrawn, counted as a no");
+    }
+    askGale();
+  }
+  if (s.galeAskedAt !== null && s.t === s.galeAskedAt + GALE_ANSWERS_AFTER) finishGale();
+  if (mode === "proposal" && s.t >= 180 && s.phase === "late") { s.phase = "covered"; stop(); }
+  render();
+}
+
+function stop() { clearInterval(timer); timer = null; render(); }
+
+function take() {
+  if (!["ringing","late"].includes(s.phase)) return;
+  const late = s.phase === "late";
+  s.phase = "taken"; s.days[6] = "t";
+  s.queue[0].note = late ? `Took it at ${s.t}s (late)` : `Took it at ${s.t}s`; s.queue[0].cls = "b-ok";
+  const g = s.queue.find(q => q.who === "The Gale");
+  if (g) { g.note = "Covered · no change"; g.cls = "b-muted"; }
+  setScore(+0.08, late ? `Took it after the first minute, still counts` : "Took it");
+  stop();
+}
+
+function decline() {
+  if (!["ringing","late"].includes(s.phase)) return;
+  s.phase = "declined"; s.turned++; s.days[6] = "d";
+  s.queue[0].note = "Turned down"; s.queue[0].cls = "b-danger";
+  setScore(-0.12, "Said no");
+  if (s.galeAskedAt === null) askGale();
+  render();
+}
+
+function card(app, right, body, cls = "") { return `<div class="note ${cls}"><div class="app"><span>${app}</span><span>${right}</span></div>${body}</div>`; }
+
+// The responder's phone is responder.html in its own window. This window owns the
+// clock and the rules; it sends the state over, and the phone sends taps back.
+const STATE_KEY = "rook-proto-state", ACTION_KEY = "rook-proto-action";
+let child = null, lastSeen = 0, bc = null;
+try { bc = new BroadcastChannel("rook-proto"); } catch (e) {}
+
+function publish() {
+  const msg = { type: "state", s, mode, running: timer !== null, at: Date.now() };
+  if (child && !child.closed) { try { child.postMessage(msg, "*"); } catch (e) {} }
+  if (bc) bc.postMessage(msg);
+  try { localStorage.setItem(STATE_KEY, JSON.stringify(msg)); } catch (e) {}
+}
+
+function onAction(m) {
+  if (!m || m.type !== "action") return;
+  lastSeen = Date.now();
+  if (m.act === "take") take();
+  else if (m.act === "no") decline();
+  else if (m.act === "ok") { s.launchSeen = true; render(); }
+  else publish(); // hello / heartbeat: send the current state
+  renderConn();
+}
+window.addEventListener("message", e => onAction(e.data));
+if (bc) bc.onmessage = e => onAction(e.data);
+window.addEventListener("storage", e => {
+  if (e.key === ACTION_KEY && e.newValue) { try { onAction(JSON.parse(e.newValue)); } catch (err) {} }
+});
+
+function renderConn() {
+  const on = Date.now() - lastSeen < 4000;
+  $("conn").textContent = on ? "Connected" : "Not open";
+  $("conn").className = "badge " + (on ? "b-ok" : "b-muted");
+  $("conn-help").textContent = on
+    ? "Taps on the phone show up here straight away. Send a callout and answer it in the other window."
+    : 'Press "📱 Open responder window". Put the two windows side by side, then send a callout from here and answer it there.';
+}
+setInterval(renderConn, 1000);
+
+function renderPhone() { publish(); }
+
+function liveBlock() {
+  const running = timer !== null;
+  const rows = s.queue.length
+    ? s.queue.map((q, i) => `<div class="q"><span>${i + 1}. ${q.who}</span><span class="badge ${q.cls}">${q.note}</span></div>`).join("")
+    : `<div class="empty">No live callout. Press "Send a callout" above.</div>`;
+  return `<div class="live"><div class="live-h"><span><b>Live callout</b> · Eastgate</span><span class="k" id="live-t">${running ? s.t + "s" : (s.queue.length ? "finished" : "")}</span></div>${rows}</div>`;
+}
+
+// Every responder, with estimated travel time to the Eastgate callout (made up).
+// Travel time, not location: the console never shows where anyone actually is.
+const RESPONDERS = [
+  ["Meteor Mite","Eastgate","Kip",9,true], ["The Gale","Eastgate","Kip",12,true],
+  ["Nightwell","Midtown","",14,true], ["Sgt. Bulwark","Foundry Row","",16,true],
+  ["Captain Vantage","Hillcrest","",18,true], ["Cindermark","Mill District","",19,true],
+  ["Vesper","Old Town","Aunt Dot",21,true], ["Stormwrack","Southport","",22,true],
+  ["Farlight","Uptown","Linda Pruitt",24,true], ["Sgt. Falkirk","Kingsbridge","",25,true],
+  ["Ironvale","Riverside","",27,false], ["The Longcast","Lakeshore","",29,true],
+  ["The Drift","Greenway","",31,false], ["The Undertow","Harborside","Desmond Okafor",33,true],
+  ["Corporal Ashgrove","Northfield","",38,true], ["Halfmoon","Westbury","",41,false],
+].map(([name, area, handler, mins, available]) => ({ name, area, handler, mins, available }));
+const HORIZON = 45; // past 45 minutes, closeness counts for nothing in the ranking
+// What each responder did with their pings since 4.2 (12 Aug – 6 Sep), from the rook.pings table.
+const OUTCOMES = {
+  "Stormwrack": [45,9,9], "Captain Vantage": [42,11,6], "The Gale": [48,13,8], "Sgt. Falkirk": [36,8,8],
+  "Cindermark": [29,8,5], "Nightwell": [47,15,8], "Sgt. Bulwark": [26,6,7], "Ironvale": [26,6,7],
+  "The Longcast": [21,6,5], "Corporal Ashgrove": [19,6,4], "Halfmoon": [21,7,5], "The Drift": [18,5,5],
+  "Vesper": [5,3,9], "Meteor Mite": [3,3,8], "The Undertow": [3,2,9], "Farlight": [2,2,7],
+};
+let sortBy = "distance", availOnly = false, allView = "list", share = false;
+
+function stackHtml(r, max) {
+  const [t, d, m] = OUTCOMES[r.name], tot = t + d + m;
+  const scale = share ? 100 / tot : 100 / max;
+  const seg = (n, cls, label) => n ? `<i class="${cls}" style="width:${n * scale}%" title="${label}: ${n} of ${tot} (${Math.round(n / tot * 100)}%)">${share ? Math.round(n / tot * 100) + "%" : n}</i>` : "";
+  return `<span class="stack" role="img" aria-label="${r.name}: ${t} taken, ${d} turned down, ${m} missed">${seg(t, "c-take", "Taken")}${seg(d, "c-no", "Turned down")}${seg(m, "c-miss", "Missed")}</span>`;
+}
+
+function bothBlock(list) {
+  const max = Math.max(...list.map(r => OUTCOMES[r.name].reduce((a, b) => a + b, 0)));
+  const rows = list.map(r => {
+    const [note, cls] = statusOf(r), tot = OUTCOMES[r.name].reduce((a, b) => a + b, 0);
+    return `<div class="brow${r.available ? "" : " off"}"><span>${r.name}<small>${r.area}${r.handler === "Kip" ? " · yours" : ""} · ${tot} pings</small></span>
+      <span class="dist"><span>${r.mins} min</span><span class="dbar" aria-hidden="true"><i style="width:${(1 - r.mins / HORIZON) * 100}%"></i></span></span>
+      <span class="stackcell">${stackHtml(r, max)}</span>
+      <span class="badge ${cls}">${note}</span></div>`;
+  }).join("");
+  return `<div class="legend"><span><i class="sw" style="background:var(--accent)"></i>Closeness</span><span><i class="sw c-take"></i>Taken</span><span><i class="sw c-no"></i>Turned down</span><span><i class="sw c-miss"></i>Missed</span></div>
+    <div class="rlist"><div class="brow bhead"><span>Responder</span><span>Travel time</span><span class="stackcell">Pings since 4.2 ${share ? "(share)" : "(count)"}</span><span style="justify-self:end">Now</span></div>${rows}</div>
+    <p class="k" style="font-size:12px;margin:8px 0 0">The closest responders aren't always the ones taking pings: Meteor Mite is nearest to this callout but missed 8 of 14. Travel times are made up; ping counts are from the pings table.</p>`;
+}
+
+function chartBlock(list) {
+  const totals = list.map(r => OUTCOMES[r.name].reduce((a, b) => a + b, 0));
+  const max = Math.max(...totals);
+  const rows = list.map((r, i) => {
+    const [t, d, m] = OUTCOMES[r.name], tot = totals[i];
+    const scale = share ? 100 / tot : 100 / max;
+    const seg = (n, cls, label) => n ? `<i class="${cls}" style="width:${n * scale}%" title="${label}: ${n} of ${tot} (${Math.round(n / tot * 100)}%)">${share ? Math.round(n / tot * 100) + "%" : n}</i>` : "";
+    return `<div class="crow"><span class="nm">${r.name}</span>
+      <span class="stack" role="img" aria-label="${r.name}: ${t} taken, ${d} turned down, ${m} missed">${seg(t, "c-take", "Taken")}${seg(d, "c-no", "Turned down")}${seg(m, "c-miss", "Missed")}</span>
+      <span class="tot">${tot}</span></div>`;
+  }).join("");
+  return `<div class="legend"><span><i class="sw c-take"></i>Taken</span><span><i class="sw c-no"></i>Turned down</span><span><i class="sw c-miss"></i>Missed</span><span class="k">Number = ${share ? "share of their pings" : "pings"} · right = total</span></div>${rows}
+    <p class="k" style="font-size:12px;margin:8px 0 0">Pings since 4.2 (12 Aug – 6 Sep), from the pings table. Hover a bar for details.</p>`;
+}
+
+function statusOf(r) {
+  const q = s.queue.find(x => x.who === r.name);
+  if (q) return [q.note, q.cls];
+  if (!r.available) return ["Off duty", "b-muted"];
+  return ["Available", "b-ok"];
+}
+
+function allBlock() {
+  let list = RESPONDERS.filter(r => !availOnly || r.available);
+  const missRate = r => OUTCOMES[r.name][2] / OUTCOMES[r.name].reduce((a, b) => a + b, 0);
+  list = [...list].sort(sortBy === "name" ? (a, b) => a.name.localeCompare(b.name)
+    : sortBy === "missed" ? (a, b) => missRate(b) - missRate(a) : (a, b) => a.mins - b.mins);
+  const rows = list.map(r => {
+    const [note, cls] = statusOf(r);
+    const mine = r.handler === "Kip" ? " · yours" : "";
+    return `<div class="rrow${r.available ? "" : " off"}"><span>${r.name}<small>${r.area}${mine}</small></span>
+      <span class="dist"><span>${r.mins} min</span><span class="dbar" aria-hidden="true"><i style="width:${(1 - r.mins / HORIZON) * 100}%"></i></span></span>
+      <span class="badge ${cls}">${note}</span></div>`;
+  }).join("");
+  const free = RESPONDERS.filter(r => r.available).length;
+  return `<h2>All responders</h2><div class="k">Travel time to the Eastgate callout (stadium) · ${free} of ${RESPONDERS.length} available</div>
+    <div class="tools" role="group" aria-label="View">
+      <span class="k" style="font-size:13px">View:</span>
+      <button data-view="list" aria-pressed="${allView === "list"}">Distance list</button>
+      <button data-view="chart" aria-pressed="${allView === "chart"}">Pings chart</button>
+      <button data-view="both" aria-pressed="${allView === "both"}">Combined</button>
+      ${allView !== "list" ? `<button data-share aria-pressed="${share}">Show as %</button>` : ""}
+    </div>
+    <div class="tools" role="group" aria-label="Sort and filter">
+      <span class="k" style="font-size:13px">Sort:</span>
+      <button data-sort="distance" aria-pressed="${sortBy === "distance"}">Nearest first</button>
+      <button data-sort="name" aria-pressed="${sortBy === "name"}">Name</button>
+      <button data-sort="missed" aria-pressed="${sortBy === "missed"}">Most missed</button>
+      <button data-avail aria-pressed="${availOnly}">Available only</button>
+    </div>
+    ${allView === "both" ? bothBlock(list) : allView === "chart" ? chartBlock(list) : `<div class="rlist">${rows}</div>
+    <p class="k" style="font-size:12px;margin:8px 0 0">Bar = how close, on the routing scale (full at 0 min, empty at ${HORIZON} min). Shows travel time only, never anyone's location.</p>`}`;
+}
+
+let detailKey = "";
+function renderDetail() {
+  const d = $("detail");
+  const key = [view, mode, s.phase, s.queue.map(q => q.note).join(), s.days.join(), sortBy, availOnly, allView, share, timer !== null].join("|");
+  if (key === detailKey) { const lt = $("live-t"); if (lt) lt.textContent = timer ? s.t + "s" : "finished"; return; }
+  detailKey = key;
+  if (view === "all") { d.innerHTML = allBlock(); return; }
+  if (view === "gale") {
+    d.innerHTML = `<h2>The Gale</h2><div class="k">Eastgate · usual 13 pings a week</div>
+      <div class="alert" style="border-left-color:var(--warn);background:var(--warn-bg)"><p><b>Busy:</b> 21 pings this week (usual: 13).</p>
+      <p class="k">Not fixed by this change. Needs a separate fairness rule (brief, cost 4).</p></div>${liveBlock()}`;
+    return;
+  }
+  const days = s.days.map((x, i) => `<div class="day ${x}" title="${["Wed","Thu","Fri","Sat","Sun","Mon","Today"][i]}">${["W","T","F","S","S","M","Today"][i]}</div>`).join("");
+  const alert = mode === "proposal"
+    ? `<div class="alert"><p><b>Quiet:</b> 1 ping in 7 days (usual: 11).</p>
+       <p><span class="k">Why:</span> 3 of the last 4 pings were answered after the first minute.</p>
+       <p><span class="k">What brings them back:</span> their standing was reset on launch day. Each callout they take moves them up. Missing one no longer pushes them down.</p></div>`
+    : `<div class="alert none"><p><b>No alert.</b> Today Kip only notices that Mite's phone has gone quiet, and files a ticket.</p></div>`;
+  d.innerHTML = `<h2>Meteor Mite</h2><div class="k">Eastgate · usual 11 pings a week</div>${alert}
+    <div class="k" style="font-size:13px">Last 7 days</div><div class="week">${days}</div>
+    <div class="k" style="font-size:12px">Green = took it · amber = missed · red = turned down</div>${liveBlock()}`;
+}
+
+function render(shake) {
+  renderPhone(shake);
+  renderDetail();
+  $("score-num").textContent = s.score.toFixed(2);
+  $("score-bar").style.width = (s.score * 100) + "%";
+  $("log").innerHTML = s.log.slice(-6).map(l => `<li>${l}</li>`).join("");
+  const live = ["ringing","late"].includes(s.phase);
+  $("skip").disabled = !(live && s.t < 60);
+  $("start").disabled = live || s.phase === "declined" && timer !== null;
+  $("mite-badge").textContent = s.phase === "taken" ? "Back" : "Quiet";
+  $("mite-badge").className = "badge " + (s.phase === "taken" ? "b-ok" : "b-danger");
+  $("hint").innerHTML = mode === "proposal"
+    ? `Send a callout, then answer it in the responder window. Try tapping <b>Take</b> after the first minute, or wait and The Gale takes it.`
+    : `Send a callout and wait past 60s: the ping disappears from the phone and counts against Mite.`;
+}
+
+function setMode(m) {
+  mode = m; clearInterval(timer); timer = null; phoneKey = ""; detailKey = "";
+  $("m-prop").setAttribute("aria-pressed", m === "proposal");
+  $("m-v42").setAttribute("aria-pressed", m === "v42");
+  fresh(); render();
+}
+
+$("m-prop").onclick = () => setMode("proposal");
+$("m-v42").onclick = () => setMode("v42");
+$("detail").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.sort) sortBy = b.dataset.sort;
+  else if (b.dataset.view) allView = b.dataset.view;
+  else if ("share" in b.dataset) share = !share;
+  else if ("avail" in b.dataset) availOnly = !availOnly;
+  renderDetail();
+});
+$("start").onclick = start;
+$("skip").onclick = () => { if (s.t < 59) s.t = 59; tick(); };
+$("reset").onclick = () => setMode(mode);
+$("open-resp").onclick = () => {
+  child = window.open("responder.html", "rook-responder", "width=420,height=860");
+  setTimeout(publish, 500);
+};
+document.querySelectorAll(".who").forEach(b => b.onclick = () => {
+  view = b.dataset.who;
+  document.querySelectorAll(".who").forEach(x => x.setAttribute("aria-current", x === b));
+  renderDetail();
+});
+
+fresh(); render();
+</script>
+</body>
+</html>
