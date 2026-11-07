@@ -1,6 +1,6 @@
 # Release 4.2: acceptance criteria from the data, and the test result
 
-**Date:** 7 Nov 2026 · **Data:** `rook.pings`, `rook.callouts`, `rook.support_tickets`, 29 Jun – 6 Sep 2026
+**Project:** Jedi Order · **Date:** 7 Nov 2026 · **Data:** `rook.pings`, `rook.callouts`, `rook.support_tickets`, 29 Jun – 6 Sep 2026
 
 ## How the criteria were set
 

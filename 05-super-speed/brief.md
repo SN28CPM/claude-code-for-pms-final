@@ -1,6 +1,6 @@
 # Four responders went quiet after 4.2
 
-**For:** Helen Achebe · **Owner:** [PM name], Rook Dispatch PM, accountable for this brief and its delivery · **Date:** 7 Nov 2026 · **Status:** draft for discussion
+**Project:** Jedi Order · **For:** Helen Achebe · **Owner:** Yoda, Rook Dispatch PM, accountable for this brief and its delivery · **Date:** 7 Nov 2026 · **Status:** draft for discussion
 
 ## The problem
 
@@ -99,7 +99,7 @@ that brings slow responders back would break (cost 3).
 
 | Who | Decision or work |
 | --- | --- |
-| **[PM name]** | Owns the brief end to end: gets the decisions below, tracks the measures above, and reports at 4 and 6 weeks. |
+| **Yoda** | Owns the brief end to end: gets the decisions below, tracks the measures above, and reports at 4 and 6 weeks. |
 | **Helen** | Approve this recommendation, or choose the alternative (90s plus a fresh start). Accept the time-to-accept guardrail in place of requirement B3 as written. Decide whether this replaces the "Ping timeout tuning" roadmap item. |
 | Wen | Confirm the live system matches the code, and that scores *can* be reset. Today they're kept only in memory. Size the work. Add the scoring rules to the automated tests. |
 | Marcus | Approve the scoring change. `config.py` says to tell him before any change. Agree the rollout and rollback trigger (cost 8). |

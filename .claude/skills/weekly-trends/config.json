@@ -1,7 +1,13 @@
 {
+  "project": "Jedi Order",
   "release_4_2": "2026-08-12",
   "fix_launch": null,
-  "quiet_responders": ["Farlight", "The Undertow", "Vesper", "Meteor Mite"],
+  "quiet_responders": [
+    "Farlight",
+    "The Undertow",
+    "Vesper",
+    "Meteor Mite"
+  ],
   "targets": {
     "missed_pct_max": 3.0,
     "quiet_pings_each_min": 6,

@@ -1,4 +1,4 @@
-# Rook Dispatch: post-4.2 recovery requirements
+# Jedi Order: Rook Dispatch post-4.2 recovery requirements
 
 | | |
 | --- | --- |

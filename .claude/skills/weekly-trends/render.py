@@ -136,7 +136,8 @@ def main():
         stale = (f"**No new ping data since the week of {last_data.day} {last_data.strftime('%b %Y')}.** "
                  "The numbers below haven't moved; check with Ravi that the pings table is still being filled.")
 
-    md = [f"# Weekly trends: {run}", "", f"Release 4.2 shipped {cfg['release_4_2']}. {fix_line}", ""]
+    proj = cfg.get("project", "")
+    md = [f"# {proj + ': ' if proj else ''}Weekly trends, {run}", "", f"Release 4.2 shipped {cfg['release_4_2']}. {fix_line}", ""]
     if stale:
         md += [stale, ""]
     md += ["## Averages per week, by period", "",
@@ -239,7 +240,7 @@ svg{{width:100%;height:auto}}.grid{{stroke:var(--line)}}.tick{{fill:var(--muted)
 th,td{{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}}th:first-child{{text-align:left}}
 tr th{{font-weight:500;color:var(--ink2)}}.lim{{color:var(--muted);font-size:12px}}
 </style></head><body><div class="wrap">
-<h1>Weekly trends</h1><p class="sub">Run {run} · Release 4.2 shipped {cfg['release_4_2']} · {fix_line.replace('`', '')}</p>
+<h1>{proj + ': ' if proj else ''}Weekly trends</h1><p class="sub">Run {run} · Release 4.2 shipped {cfg['release_4_2']} · {fix_line.replace('`', '')}</p>
 {f'<div class="warn">{stale.replace("**", "")}</div>' if stale else ''}
 <div class="cards">{cards}</div>{ac_html}{charts}
 <p class="foot">Source: rook.pings and rook.support_tickets. Dashed lines mark the 4.2 release and the fix launch. Full tables: {run}.md in this folder.</p>
