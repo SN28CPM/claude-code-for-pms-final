@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Release 4.2 Report</title>
+<style>
+:root{
+  --bg:#efede6;--slide:#fbfaf6;--card:#ffffff;--ink:#16161a;--ink2:#4f4e49;--muted:#8a8982;--line:rgba(0,0,0,.10);
+  --navy:#14213d;--navy-ink:#f3f1ea;--amber:#e8a12e;--amber-bg:#fbf0d9;--green:#1f9d5c;--green-bg:#e2f4ea;
+  --red:#d2453f;--red-bg:#fbe7e6;--blue:#2a6fd6;--blue-bg:#e6eefb;--gray:#b4b2a9;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d0d0f;--slide:#17171a;--card:#202024;--ink:#efeee9;--ink2:#c3c2b7;--muted:#8a8982;--line:rgba(255,255,255,.12);
+  --navy:#0b1426;--amber:#f0b44a;--amber-bg:#3a2d14;--green:#3cc47f;--green-bg:#16301f;--red:#ef7470;--red-bg:#3a1d1c;
+  --blue:#6aa0f0;--blue-bg:#1a2740;--gray:#5f5e5a;}}
+:root[data-theme="dark"]{
+  --bg:#0d0d0f;--slide:#17171a;--card:#202024;--ink:#efeee9;--ink2:#c3c2b7;--muted:#8a8982;--line:rgba(255,255,255,.12);
+  --navy:#0b1426;--amber:#f0b44a;--amber-bg:#3a2d14;--green:#3cc47f;--green-bg:#16301f;--red:#ef7470;--red-bg:#3a1d1c;
+  --blue:#6aa0f0;--blue-bg:#1a2740;--gray:#5f5e5a;}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 14px}
+button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.deck{position:fixed;inset:0;display:flex;flex-direction:column}
+.stage{flex:1;position:relative;overflow:hidden}
+.slide{position:absolute;inset:0;padding:28px clamp(16px,4vw,56px) 20px;overflow-y:auto;opacity:0;visibility:hidden;transform:translateX(24px);transition:opacity .35s,transform .35s,visibility .35s;background:var(--slide)}
+.slide.on{opacity:1;visibility:visible;transform:none}
+.slide.back{transform:translateX(-24px)}
+@media (prefers-reduced-motion: reduce){.slide{transition:none;transform:none}}
+.inner{max-width:1100px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;justify-content:center;gap:18px}
+.kicker{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--amber)}
+h1{font-size:clamp(30px,5vw,56px);line-height:1.05;margin:0;letter-spacing:-.02em}
+h2{font-size:clamp(24px,3.4vw,38px);line-height:1.12;margin:0;letter-spacing:-.01em}
+h3{font-size:17px;margin:0 0 6px}
+p{margin:0}
+.lead{font-size:clamp(17px,2vw,21px);color:var(--ink2);max-width:62ch}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:22px;align-items:start}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:820px){.grid2,.grid3{grid-template-columns:minmax(0,1fr)}.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.stat .n{font-size:clamp(30px,4vw,44px);font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat .l{font-size:14px;color:var(--ink2)}
+.from{color:var(--muted);font-weight:500;font-size:.6em}
+.red{color:var(--red)}.green{color:var(--green)}.amber{color:var(--amber)}.blue{color:var(--blue)}
+.prompt{background:var(--navy);color:var(--navy-ink);border-radius:14px;padding:14px 16px;font:15px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;position:relative}
+.prompt .tag{display:block;font:600 11px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);margin-bottom:8px}
+.prompt .q::before{content:"> ";color:var(--amber)}
+.finding{border-left:4px solid var(--amber);padding:2px 0 2px 14px}
+.finding b{font-weight:650}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px}
+.p-red{background:var(--red-bg);color:var(--red)}.p-green{background:var(--green-bg);color:var(--green)}.p-amber{background:var(--amber-bg);color:var(--amber)}.p-blue{background:var(--blue-bg);color:var(--blue)}
+.small{font-size:13px;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--ink2);margin:6px 0}
+.legend span{display:flex;align-items:center;gap:6px}
+.sw{width:16px;height:0;border-top:3px solid}
+svg.chart{width:100%;height:auto;display:block}
+svg .grid{stroke:var(--line)}svg .tick{fill:var(--muted);font-size:11px}svg .mark{stroke:var(--muted);stroke-dasharray:4 4}
+svg .lbl{fill:var(--ink2);font-size:12px}
+/* hero */
+.hero{background:var(--navy);color:var(--navy-ink)}
+.hero .lead{color:#c9c6bb}
+.pulse-dot{width:14px;height:14px;border-radius:50%;background:var(--amber);display:inline-block;margin-right:10px;box-shadow:0 0 0 0 rgba(232,161,46,.6);animation:ring 1.8s infinite}
+@keyframes ring{70%{box-shadow:0 0 0 14px rgba(232,161,46,0)}100%{box-shadow:0 0 0 0 rgba(232,161,46,0)}}
+@media (prefers-reduced-motion: reduce){.pulse-dot{animation:none}}
+/* loop diagram */
+.loop{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;align-items:stretch}
+@media (max-width:820px){.loop{grid-template-columns:minmax(0,1fr)}}
+.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;position:relative}
+.step .num{font-size:12px;font-weight:700;color:var(--amber)}
+.step b{display:block;font-size:16px;margin:2px 0 4px}
+.step span{font-size:14px;color:var(--ink2)}
+.step.hot{border-color:var(--red);background:var(--red-bg)}
+/* scoreboard */
+.score{display:grid;grid-template-columns:minmax(150px,1.6fr) repeat(4,minmax(0,1fr));gap:4px;font-size:13px}
+.score div{padding:7px 8px;border-radius:6px;background:var(--card);border:1px solid var(--line);text-align:center;font-variant-numeric:tabular-nums}
+.score .h{background:none;border:0;color:var(--muted);font-weight:600}
+.score .rl{text-align:left}
+.score .f{background:var(--red-bg);color:var(--red);border-color:transparent}
+.score .p{background:var(--green-bg);color:var(--green);border-color:transparent}
+/* demo */
+.demo{display:grid;grid-template-columns:minmax(0,1.2fr) 300px;gap:18px;align-items:start}
+@media (max-width:820px){.demo{grid-template-columns:minmax(0,1fr)}}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;border-radius:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--slide)}
+.go{background:var(--blue);border-color:var(--blue);color:#fff}
+.go[disabled]{opacity:.45;cursor:not-allowed}
+.q{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.q:last-child{border-bottom:0}
+.phone{background:#111;border-radius:34px;padding:10px;max-width:300px;margin:0 auto;width:100%}
+.screen{background:linear-gradient(#262a37,#121318);border-radius:26px;min-height:380px;padding:16px 12px;color:#f2f2ef;display:flex;flex-direction:column;gap:10px}
+.clock{text-align:center;font-size:40px;font-weight:300}
+.note{background:#24242a;border-radius:16px;padding:12px;font-size:14px}
+.note .row{display:flex;gap:8px;margin-top:10px}
+.note .row button{flex:1;border:0;border-radius:12px;padding:11px;font-weight:700}
+.take{background:#2fbf71;color:#04210f}.no{background:#3a3a42;color:#f2f2ef}
+.ringbar{height:6px;border-radius:3px;background:#3a3a42;overflow:hidden;margin-top:8px}
+.ringbar i{display:block;height:100%;background:#f2b84b}
+.note.ringing{outline:2px solid #f2b84b}.note.late{outline:2px dashed #f2b84b}.note.good{outline:2px solid #2fbf71}
+.meter{height:10px;border-radius:5px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--blue);transition:width .4s}
+/* nav */
+.nav{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid var(--line);background:var(--slide)}
+.dots{flex:1;display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.dots button{width:10px;height:10px;padding:0;border-radius:50%;border:0;background:var(--gray)}
+.dots button[aria-current="true"]{background:var(--amber);width:26px;border-radius:5px}
+.count{font-size:13px;color:var(--muted);min-width:54px;text-align:right;font-variant-numeric:tabular-nums}
+.ladder{display:flex;align-items:flex-end;gap:6px;height:120px}
+.ladder i{flex:1;border-radius:6px 6px 0 0;background:var(--blue-bg);position:relative}
+.ladder i.ok{background:var(--green)}
+.weight{display:flex;height:46px;border-radius:12px;overflow:hidden;gap:3px;font-weight:600;font-size:14px}
+.weight div{display:flex;align-items:center;padding:0 12px;white-space:nowrap;overflow:hidden}
+a{color:var(--blue)}
+</style>
+</head>
+<body>
+<div class="deck" role="region" aria-label="Release 4.2 presentation">
+<div class="stage" id="stage">
+
+<!-- 1 -->
+<section class="slide hero" aria-label="Title">
+  <div class="inner">
+    <div class="kicker"><span class="pulse-dot" aria-hidden="true"></span>Rook Dispatch · Release 4.2 review</div>
+    <h1>We cut the ping wait by 30 seconds.<br>Four responders went silent.</h1>
+    <p class="lead">What happened after 12 August, how we proved it across six modules of work, the fix we'd build, and the skills that stop it happening again.</p>
+    <p class="small" style="color:#9d9a90">Made-up company, real working file · 7 Nov 2026 · Use ← → or the buttons below</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="slide" aria-label="What happened">
+  <div class="inner">
+    <div class="kicker">What happened, plainly</div>
+    <h2>4.2 cut the ping wait from 90 to 60 seconds. Responders who need a little over a minute now "miss" pings, and the routing code punishes a miss exactly like a "no", with no recovery over time.</h2>
+    <div class="grid4">
+      <div class="card stat"><div class="n red">18% <span class="from">from 2%</span></div><div class="l">of pings missed, starting the day 4.2 shipped</div></div>
+      <div class="card stat"><div class="n red">64% <span class="from">from 77%</span></div><div class="l">acceptance rate, the headline metric</div></div>
+      <div class="card stat"><div class="n red">~1 <span class="from">from ~12</span></div><div class="l">pings a week for Farlight, The Undertow, Vesper and Meteor Mite</div></div>
+      <div class="card stat"><div class="n red">8 of 9</div><div class="l">data-based acceptance criteria that 4.2 fails</div></div>
+    </div>
+    <p class="lead">It wasn't an "August dip". Turn-downs didn't rise, the drop starts on release day, and work moved from four people to ten others instead of falling for everyone.</p>
+  </div>
+</section>
+
+<!-- 3: loop -->
+<section class="slide" aria-label="The mechanism">
+  <div class="inner">
+    <div class="kicker">How it happens</div>
+    <h2>A spiral nobody designed</h2>
+    <div class="loop">
+      <div class="step"><div class="num">1</div><b>Ping waits 60s</b><span>Was 90s. "On the stairs, one boot on" responders answer at ~70s.</span></div>
+      <div class="step hot"><div class="num">2</div><b>Counted as a miss</b><span>The ping vanishes and goes to the next person.</span></div>
+      <div class="step hot"><div class="num">3</div><b>−0.12, same as a "no"</b><span>A take only earns +0.08. The score never recovers on its own.</span></div>
+      <div class="step"><div class="num">4</div><b>Ranked lower</b><span>Others now get asked first, even on the responder's home patch.</span></div>
+      <div class="step hot"><div class="num">5</div><b>Fewer chances</b><span>Rare pings arrive out of the blue and get missed too. Back to 2.</span></div>
+    </div>
+    <p class="lead">A 2019 note in the code asked whether scores should recover over time. Nobody came back to it, so the shorter wait turned a small rule into a trap.</p>
+  </div>
+</section>
+
+<!-- 4: M1 -->
+<section class="slide" aria-label="Module 1">
+  <div class="inner">
+    <div class="kicker">Module 1 · Origin Story · the context</div>
+    <div class="grid2">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h2>Nobody had written down how Dispatch decides who gets pinged.</h2>
+        <div class="prompt"><span class="tag">My prompt, exactly as typed</span><span class="q">is there a priority criteria for the pings/</span></div>
+        <p class="finding"><b>Finding:</b> no routing weights were documented anywhere: not the wiki, not the release notes, not Priya's handoff. The only answer was in the code, which nobody on the 4.2 thread had read. Marcus's 14 Aug question about it went unanswered.</p>
+      </div>
+      <div class="card">
+        <h3>What the team had to go on before 4.2 shipped</h3>
+        <div id="m1-list"></div>
+        <p class="small" style="margin-top:8px">Sources: Rook wiki, 4.2 release thread, Priya's handoff note.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5: M2 -->
+<section class="slide" aria-label="Module 2">
+  <div class="inner">
+    <div class="kicker">Module 2 · Super Hearing · the voices</div>
+    <div class="grid2">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h2>The interviews and the tickets were telling different stories.</h2>
+        <div class="prompt"><span class="tag">My prompt, exactly as typed</span><span class="q">based on these responses can i get insight into where the issue could begiven the wide variety of responses in the interviews and the actual tickets</span></div>
+        <p class="finding"><b>Finding:</b> the four interviews and the 147 tickets came from different people. Only one handler appears in both. Interviews were loud on alerts, dark mode and text size. The tickets were loud on two things, both open and both starting with 4.2: responders who'd gone quiet, and pings gone before anyone could answer.</p>
+      </div>
+      <div class="card">
+        <h3>Callout tickets after 4.2, by theme</h3>
+        <div id="m2-chart"></div>
+        <p class="small">Source: support_tickets. All 45 open. None of these themes came up in the interviews.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6: M3 -->
+<section class="slide" aria-label="Module 3">
+  <div class="inner">
+    <div class="kicker">Module 3 · Rewind · the numbers</div>
+    <div class="grid2">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h2>The day 4.2 shipped, missed pings jumped ninefold.</h2>
+        <div class="prompt"><span class="tag">My prompt, exactly as typed</span><span class="q">summarize what changed after 4.2</span></div>
+        <p class="finding"><b>Finding:</b> acceptance fell from about 77% to 64%, and almost all of it was missed pings: 2% before, 18% after, starting on 12 Aug itself. Turn-downs didn't rise (21% to 18%). Callouts nobody took doubled, from 5.5% to 11%.</p>
+      </div>
+      <div class="card">
+        <h3>Share of pings, week by week</h3>
+        <div class="legend"><span><i class="sw" style="border-color:var(--green)"></i>Taken</span><span><i class="sw" style="border-color:var(--red);border-top-style:dashed"></i>Missed</span></div>
+        <div id="m3-chart"></div>
+        <p class="small">Source: rook.pings, 1,696 pings, 29 Jun – 6 Sep.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7: M4 -->
+<section class="slide" aria-label="Module 4">
+  <div class="inner">
+    <div class="kicker">Module 4 · X-Ray Vision · the code</div>
+    <div class="grid2">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h2>The scoring formula explains who went quiet.</h2>
+        <div class="prompt"><span class="tag">My prompt, exactly as typed</span><span class="q">WHATS THE SCORING FORMULA</span></div>
+        <div class="weight" aria-label="Score weights: closeness 60%, said yes lately 25%, skills 15%">
+          <div style="flex:60;background:var(--blue-bg);color:var(--blue)">Closeness 60%</div>
+          <div style="flex:25;background:var(--red-bg);color:var(--red)">Said yes lately 25%</div>
+          <div style="flex:15;background:var(--card);color:var(--ink2);border:1px solid var(--line)">Skills 15%</div>
+        </div>
+        <p class="finding"><b>Finding:</b> a miss costs −0.12, the same as a "no"; a take earns +0.08; the score never resets. The responders who took the biggest hit in week one (The Undertow −0.72, Meteor Mite −0.56, Farlight −0.44) were the ones who went quiet.</p>
+      </div>
+      <div class="card">
+        <h3>Average pings a week, three groups of responders</h3>
+        <div class="legend"><span><i class="sw" style="border-color:var(--blue)"></i>10 getting more work</span><span><i class="sw" style="border-color:var(--amber);border-top-style:dashed"></i>2 fading</span><span><i class="sw" style="border-color:var(--red);border-top-style:dotted"></i>4 dropped out</span></div>
+        <div id="m4-chart"></div>
+        <p class="small">Source: rook.pings. The split was still widening at the end of the data.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8: M5 -->
+<section class="slide" aria-label="Module 5">
+  <div class="inner">
+    <div class="kicker">Module 5 · Super Speed · the fix</div>
+    <div class="grid2">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h2>Keep 60 seconds, change what happens around it.</h2>
+        <div class="prompt"><span class="tag">My prompt, exactly as typed</span><span class="q">Can you create a solution brief to fix the issue while keeping the 60s response time?</span></div>
+        <p class="finding"><b>Artifact:</b> <code>05-super-speed/brief.md</code>. The ping stays open after 60 seconds (the first yes wins), being late is no longer a "no", and every score gets one fresh start. Stress-tested on 20 runs: <b>no fix works without the fresh start</b>, not even going back to 90 seconds.</p>
+      </div>
+      <div class="card">
+        <h3>Slow responders' pings a week, by fix (test data)</h3>
+        <div id="m5-chart"></div>
+        <p class="small">Median of 20 runs; slow responders made 14.3 pings a week under 4.1. If they really answer in 100s, "back to 90s" collapses to 1.1 a week; this proposal holds at 14.4.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9: M6 -->
+<section class="slide" aria-label="Module 6">
+  <div class="inner">
+    <div class="kicker">Module 6 · Sidekicks · the test</div>
+    <div class="grid2">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h2>Judged by its own data, 4.2 fails 8 of 9 criteria.</h2>
+        <div class="prompt"><span class="tag">My prompt, exactly as typed</span><span class="q">based on the data we have  can you generate an acceptance criteria and also test 4.2</span></div>
+        <p class="finding"><b>Finding:</b> each limit is the worst normal week before 4.2. Even 4.2's own promise failed: pings were meant to move on <i>sooner</i>, but reaching the responder who takes the job went from about 26 seconds to 61.</p>
+      </div>
+      <div class="card">
+        <h3>Weeks after release (✓ pass, ✗ fail)</h3>
+        <div class="score" id="m6-score"></div>
+        <p class="small" style="margin-top:8px">Source: <code>dispatch-4.2-acceptance-test.md</code>. AC3 turn-downs is the only one that recovers.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10: prototype -->
+<section class="slide" aria-label="Prototype">
+  <div class="inner">
+    <div class="kicker">The fix, through my prototype</div>
+    <div class="grid2" style="grid-template-columns:minmax(0,1fr) minmax(0,1.6fr)">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <h2>Try it: send a callout to Meteor Mite.</h2>
+        <div class="prompt"><span class="tag">My prompt, exactly as typed</span><span class="q">give me 2 different browser windows for dispatcher and responder instead of one</span></div>
+        <p class="lead" style="font-size:16px">Kip's console and Mite's phone. In <b>Proposal</b> mode, wait past 60s and the ping stays open; a late take still counts. Switch to <b>4.2 today</b> and the same ping vanishes and costs Mite 0.12.</p>
+        <p class="small">The full versions: <a href="05-super-speed/dispatcher.html">dispatcher.html</a> + <a href="05-super-speed/responder.html">responder.html</a> (two windows), <a href="05-super-speed/prototype.html">prototype.html</a>, <a href="05-super-speed/prototype-mobile.html">prototype-mobile.html</a>. Open this file from the course folder for the links to work.</p>
+      </div>
+      <div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px">
+          <div class="seg" role="group" aria-label="Rules"><button id="d-prop" aria-pressed="true">Proposal</button><button id="d-v42" aria-pressed="false">4.2 today</button></div>
+          <button class="go" id="d-start">▶ Send a callout</button>
+          <button id="d-reset">Reset</button>
+        </div>
+        <div class="demo">
+          <div class="card">
+            <h3>Kip's console · live callout</h3>
+            <div id="d-queue"><p class="small">No live callout yet.</p></div>
+            <div style="margin-top:12px" class="small">Meteor Mite's score (hidden from users): <b id="d-score">0.50</b></div>
+            <div class="meter" style="margin-top:4px"><i id="d-meter" style="width:50%"></i></div>
+            <p class="small" id="d-log" style="margin-top:8px" aria-live="polite"></p>
+          </div>
+          <div class="phone"><div class="screen"><div class="clock" id="d-clock">14:02</div><div id="d-cards" aria-live="polite"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11: skills -->
+<section class="slide" aria-label="Skills">
+  <div class="inner">
+    <div class="kicker">Keeping it from happening again</div>
+    <h2>No success measures for 4.2 could be found, and the real weekly numbers went unchecked for weeks. My skills close both gaps.</h2>
+    <div class="grid3">
+      <div class="card">
+        <span class="pill p-blue">Before shipping</span>
+        <h3 style="margin-top:8px">review-checklist + fix-brief</h3>
+        <p style="font-size:15px;color:var(--ink2)">Every brief must name an owner, say how we'll know it worked, keep its scope, and explain the problem first. fix-brief proposes the edits and waits for my approval.</p>
+        <div class="prompt" style="margin-top:10px;font-size:13px"><span class="tag">My prompt</span><span class="q">yes fix the brief and make it a skill to fix these type of things when we prepare a brief going forward</span></div>
+        <p class="small" style="margin-top:8px">On my own brief: 0 of 4 checks passed → 3 of 4 after the fixes (the owner's name is still to fill in).</p>
+      </div>
+      <div class="card">
+        <span class="pill p-amber">Every Monday</span>
+        <h3 style="margin-top:8px">weekly-trends</h3>
+        <p style="font-size:15px;color:var(--ink2)">Pulls the pings and tickets, compares before 4.2, after 4.2 and after the fix, and scores AC1–AC9. Scheduled to run every week.</p>
+        <div class="prompt" style="margin-top:10px;font-size:13px"><span class="tag">My prompt</span><span class="q">create a skill to display trends every week before and after the fix. And this needs to run every week.</span></div>
+      </div>
+      <div class="card">
+        <span class="pill p-green">What it would have caught</span>
+        <h3 style="margin-top:8px">Week one, not week six</h3>
+        <p style="font-size:15px;color:var(--ink2)">Run on Monday 17 Aug, the report would already have shown:</p>
+        <div class="grid2" style="grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+          <div class="card stat" style="padding:10px"><div class="n red" style="font-size:30px">2/9</div><div class="l">criteria passing</div></div>
+          <div class="card stat" style="padding:10px"><div class="n red" style="font-size:30px">21.5%</div><div class="l">missed (limit 3.5%)</div></div>
+        </div>
+        <p class="small" style="margin-top:8px">Instead the team waited for September, calling it an "August dip".</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 12: asks -->
+<section class="slide hero" aria-label="Next steps">
+  <div class="inner">
+    <div class="kicker">What I need next</div>
+    <h2 style="color:var(--navy-ink)">Approve the fix, and watch it every Monday.</h2>
+    <div class="grid3">
+      <div class="card" style="background:#1d2a48;border-color:#2b3a5e;color:var(--navy-ink)"><h3>Helen</h3><p style="color:#c9c6bb">Approve the proposal (or 90s plus a fresh start), and accept the time-to-accept guardrail in place of requirement B3.</p></div>
+      <div class="card" style="background:#1d2a48;border-color:#2b3a5e;color:var(--navy-ink)"><h3>Wen · Marcus</h3><p style="color:#c9c6bb">Confirm scores can be reset, size the change, and agree a one-region rollout with a rollback trigger.</p></div>
+      <div class="card" style="background:#1d2a48;border-color:#2b3a5e;color:var(--navy-ink)"><h3>Ravi · Nadia</h3><p style="color:#c9c6bb">Log answer times and a "covered" outcome; refresh the pings data (it stops at 6 Sep); confirm ticket baselines.</p></div>
+    </div>
+    <p class="lead">Success is four quiet responders back above 6 pings a week within 4 weeks, missed pings at 3% or less, and all nine criteria passing for four Mondays in a row.</p>
+  </div>
+</section>
+
+</div>
+<nav class="nav" aria-label="Slides">
+  <button id="prev" aria-label="Previous slide">←</button>
+  <div class="dots" id="dots"></div>
+  <span class="count" id="count"></span>
+  <button id="next" aria-label="Next slide">→</button>
+</nav>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+// ---------- slides ----------
+const slides = [...document.querySelectorAll(".slide")];
+let cur = 0;
+slides.forEach((s, i) => {
+  const b = document.createElement("button");
+  b.setAttribute("aria-label", `Go to slide ${i + 1}: ${s.getAttribute("aria-label")}`);
+  b.onclick = () => go(i);
+  $("dots").appendChild(b);
+});
+function go(i) {
+  i = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach((s, j) => { s.classList.toggle("on", j === i); s.classList.toggle("back", j < i); s.setAttribute("aria-hidden", j !== i); });
+  [...$("dots").children].forEach((d, j) => d.setAttribute("aria-current", j === i));
+  $("count").textContent = `${i + 1} / ${slides.length}`;
+  $("prev").disabled = i === 0; $("next").disabled = i === slides.length - 1;
+  cur = i;
+  try { history.replaceState(null, "", "#" + (i + 1)); } catch (e) {}
+}
+$("prev").onclick = () => go(cur - 1);
+$("next").onclick = () => go(cur + 1);
+document.addEventListener("keydown", e => {
+  if (e.target.closest && e.target.closest("button, input") && (e.key === " " || e.key === "Enter")) return;
+  if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); go(cur + 1); }
+  if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); go(cur - 1); }
+  if (e.key === "Home") go(0);
+  if (e.key === "End") go(slides.length - 1);
+});
+let tx = null;
+$("stage").addEventListener("touchstart", e => { tx = e.touches[0].clientX; }, { passive: true });
+$("stage").addEventListener("touchend", e => {
+  if (tx === null) return; const dx = e.changedTouches[0].clientX - tx;
+  if (Math.abs(dx) > 60) go(cur + (dx < 0 ? 1 : -1)); tx = null;
+});
+
+// ---------- charts (real numbers from the course work) ----------
+const WEEKS = ["29 Jun","6 Jul","13 Jul","20 Jul","27 Jul","3 Aug","10 Aug","17 Aug","24 Aug","31 Aug"];
+function lineChart(el, series, { max, unit = "", label }) {
+  const W = 560, H = 230, L = 38, R = 10, T = 22, B = 28, n = WEEKS.length;
+  const x = i => L + (W - L - R) * i / (n - 1), y = v => T + (H - T - B) * (1 - v / max);
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${label}"><title>${label}</title>`;
+  for (let g = 0; g <= 4; g++) { const v = max * g / 4; s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text class="tick" x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${Math.round(v)}${unit}</text>`; }
+  WEEKS.forEach((w, i) => { if (i % 2 === 0 || i === n - 1) s += `<text class="tick" x="${x(i)}" y="${H - 8}" text-anchor="middle">${w}</text>`; });
+  const rx = (x(5) + x(6)) / 2 + (x(6) - x(5)) * 0.2;
+  s += `<line class="mark" x1="${rx}" x2="${rx}" y1="${T - 8}" y2="${H - B}"/><text class="tick" x="${rx + 4}" y="${T - 10}">4.2 ships</text>`;
+  series.forEach(({ data, color, dash }) => {
+    const pts = data.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+    s += `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" ${dash ? `stroke-dasharray="${dash}"` : ""}/>`;
+    data.forEach((v, i) => { s += `<circle cx="${x(i)}" cy="${y(v)}" r="3.5" fill="${color}" stroke="${css("--card")}" stroke-width="1.5"><title>${WEEKS[i]}: ${v}${unit}</title></circle>`; });
+  });
+  el.innerHTML = s + "</svg>";
+}
+function barChart(el, rows, { max, unit = "", label, ref }) {
+  const W = 560, rowH = 38, L = 200, R = 50, H = rows.length * rowH + 14;
+  const x = v => L + (W - L - R) * v / max;
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${label}"><title>${label}</title>`;
+  if (ref) s += `<line class="mark" x1="${x(ref.v)}" x2="${x(ref.v)}" y1="0" y2="${H - 6}"/><text class="tick" x="${x(ref.v) + 4}" y="${H - 4}">${ref.label}</text>`;
+  rows.forEach((r, i) => {
+    const yy = i * rowH + 6;
+    s += `<text class="lbl" x="${L - 10}" y="${yy + 19}" text-anchor="end">${r.name}</text>`;
+    s += `<rect x="${L}" y="${yy + 5}" width="${Math.max(2, x(r.v) - L)}" height="22" rx="5" fill="${r.color}"><title>${r.name}: ${r.v}${unit}</title></rect>`;
+    s += `<text class="lbl" x="${x(r.v) + 6}" y="${yy + 21}" style="font-weight:600;fill:${css("--ink")}">${r.v}${unit}</text>`;
+  });
+  el.innerHTML = s + "</svg>";
+}
+function drawCharts() {
+  const G = css("--green"), Rd = css("--red"), B = css("--blue"), A = css("--amber"), Gy = css("--gray");
+  lineChart($("m3-chart"), [
+    { data: [76.7,77.1,76.4,75.0,77.6,77.9,54.2,65.8,66.7,72.7], color: G },
+    { data: [1.7,2.4,3.4,2.8,2.4,1.2,21.5,17.7,14.8,12.7], color: Rd, dash: "7 5" },
+  ], { max: 100, unit: "%", label: "Weekly taken and missed share of pings; missed jumps from about 2% to 21.5% in the release week" });
+  lineChart($("m4-chart"), [
+    { data: [10.2,10.1,10.5,10.5,9.9,10.2,11.3,12.5,14.1,14.7], color: B },
+    { data: [10.5,10.5,10.5,10.5,10.5,10.5,10.5,8.5,7.5,7.5], color: A, dash: "7 5" },
+    { data: [12.3,12,12,12.5,12.5,12.3,10.8,4,1.5,0.8], color: Rd, dash: "2 4" },
+  ], { max: 16, label: "Average weekly pings: gaining group rises to 14.7, fading group falls to 7.5, dropped-out group falls to 0.8" });
+  barChart($("m2-chart"), [
+    { name: "Quiet responder", v: 30, color: Rd },
+    { name: "Gone before answering", v: 15, color: A },
+  ], { max: 34, label: "Tickets after 4.2: 30 about quiet responders, 15 about pings gone before answering" });
+  barChart($("m5-chart"), [
+    { name: "4.2 left as is", v: 0.8, color: Gy },
+    { name: "Back to 90s", v: 2.2, color: Gy },
+    { name: "Proposal, no fresh start", v: 1.6, color: Gy },
+    { name: "90s + fresh start", v: 15.6, color: B },
+    { name: "Proposal + fresh start", v: 19.2, color: G },
+  ], { max: 22, label: "Slow responders' pings per week by fix", ref: { v: 14.3, label: "4.1 level" } });
+}
+
+// ---------- module 1 checklist ----------
+$("m1-list").innerHTML = [
+  ["Routing weights written down", false], ["How a missed ping is scored", false],
+  ["Success measures for the 4.2 change (none found)", false], ["Real weekly acceptance numbers (only \"rough\" ones offered)", false],
+  ["An owner for the Q3 roadmap (all items were Priya's)", false], ["Release notes listing what changed", true],
+].map(([t, ok]) => `<div class="q"><span>${t}</span><span class="pill ${ok ? "p-green" : "p-red"}">${ok ? "Yes" : "Missing"}</span></div>`).join("");
+
+// ---------- module 6 scoreboard ----------
+const AC = [
+  ["AC1 Taken ≥ 75%", ["54.2%","65.8%","66.7%","72.7%"], [0,0,0,0]],
+  ["AC2 Missed ≤ 3.5%", ["21.5%","17.7%","14.8%","12.7%"], [0,0,0,0]],
+  ["AC3 Turned down ≤ 23%", ["24.3%","16.5%","18.5%","14.5%"], [0,1,1,1]],
+  ["AC4 Nobody took it ≤ 8.3%", ["12.7%","14.0%","12.9%","5.5%"], [0,0,0,1]],
+  ["AC5 Pings per callout ≤ 1.26", ["1.61","1.31","1.31","1.30"], [0,0,0,0]],
+  ["AC6 Reach the taker ≤ 29 s", ["61 s","61 s","61 s","40 s"], [0,0,0,0]],
+  ["AC7 Nobody below half", ["0","4","4","4"], [1,0,0,0]],
+  ["AC8 Nobody above 1.5×", ["0","0","1","2"], [1,1,0,0]],
+  ["AC9 Callout tickets ≤ 1", ["7","11","15","10"], [0,0,0,0]],
+];
+$("m6-score").innerHTML = `<div class="h rl">Criterion</div><div class="h">10 Aug</div><div class="h">17 Aug</div><div class="h">24 Aug</div><div class="h">31 Aug</div>` +
+  AC.map(([n, v, ok]) => `<div class="rl">${n}</div>` + v.map((x, i) => `<div class="${ok[i] ? "p" : "f"}">${x} ${ok[i] ? "✓" : "✗"}</div>`).join("")).join("");
+
+// ---------- prototype demo ----------
+let mode = "proposal", st, timer = null, key = "";
+function fresh() { st = { t: 0, phase: "idle", score: mode === "proposal" ? 0.5 : 0, q: [], galeAt: null, log: mode === "proposal" ? "Launch day: every score reset to 0.50." : "Mite's score is at the floor after weeks of misses." }; }
+const live = () => st.phase === "ringing" || st.phase === "late";
+function score(d, why) { st.score = Math.max(0, Math.min(1, +(st.score + d).toFixed(2))); st.log = `${why} (${d > 0 ? "+" : ""}${d.toFixed(2)})`; }
+function start() {
+  if (live()) return;
+  st.t = 0; st.phase = "ringing"; st.galeAt = null; st.q = [{ w: "Meteor Mite", n: "Asked", c: "p-blue" }];
+  st.log = "Eastgate callout. Mite is closest (9 min), so is asked first.";
+  clearInterval(timer); timer = setInterval(tick, 70); render();
+}
+function tick() {
+  st.t++;
+  if (st.t === 60 && st.phase === "ringing") {
+    if (mode === "proposal") { st.phase = "late"; st.q[0] = { w: "Meteor Mite", n: "Still open", c: "p-amber" }; st.log = "60s: The Gale is asked too. Mite's ping stays open."; }
+    else { st.phase = "gone"; st.q[0] = { w: "Meteor Mite", n: "Missed", c: "p-red" }; score(-0.12, "60s: the ping vanished and counted as a no"); }
+    st.galeAt = st.t; st.q.push({ w: "The Gale", n: "Asked at 60s", c: "p-blue" });
+  }
+  if (st.galeAt !== null && st.t === st.galeAt + 30) {
+    st.q[1] = { w: "The Gale", n: "Took it", c: "p-green" };
+    if (live()) { st.phase = "covered"; st.q[0] = { w: "Meteor Mite", n: "Covered · no change", c: "p-blue" }; st.log = "The Gale took it first. Mite's score is unchanged."; }
+    stop();
+  }
+  render();
+}
+function stop() { clearInterval(timer); timer = null; render(); }
+function take() {
+  if (!live()) return; const late = st.phase === "late";
+  st.phase = "taken"; st.q[0] = { w: "Meteor Mite", n: late ? "Took it (late)" : "Took it", c: "p-green" };
+  if (st.q[1]) st.q[1] = { w: "The Gale", n: "Covered", c: "p-blue" };
+  score(0.08, late ? "Late take, still counts" : "Took it"); stop();
+}
+function decline() {
+  if (!live()) return; st.phase = "declined"; st.q[0] = { w: "Meteor Mite", n: "Turned down", c: "p-red" };
+  score(-0.12, "Said no"); if (!st.q[1]) { st.q.push({ w: "The Gale", n: "Took it", c: "p-green" }); } stop();
+}
+function card(cls, body) { return `<div class="note ${cls}">${body}</div>`; }
+function render() {
+  const left = Math.max(0, 60 - st.t);
+  $("d-clock").textContent = `14:${String(2 + Math.floor(st.t / 60)).padStart(2, "0")}`;
+  const k = [mode, st.phase].join("|");
+  if (k !== key) {
+    key = k;
+    let h = "";
+    if (st.phase === "idle") h = card("", `<b>No callouts right now</b><div style="opacity:.75;font-size:13px">Available in Eastgate</div>`);
+    if (st.phase === "ringing") h = card("ringing", `<div style="display:flex;justify-content:space-between"><b>New callout · Eastgate</b><b id="d-left">${left}s</b></div><div style="opacity:.8">9 min away · lifting parked cars outside the stadium</div><div class="ringbar"><i id="d-bar" style="width:${left / 60 * 100}%"></i></div><div class="row"><button class="take" data-a="take">Take</button><button class="no" data-a="no">Turn down</button></div>`);
+    if (st.phase === "late") h = card("late", `<b>Someone else is being asked too.</b><div>Still open: tap to take.</div><div class="row"><button class="take" data-a="take">Take</button><button class="no" data-a="no">Turn down</button></div>`);
+    if (st.phase === "taken") h = card("good", `<b>You're on it.</b><div style="opacity:.8">Kip has been told.</div>`);
+    if (st.phase === "covered") h = card("", `<b>Covered by another responder.</b><div>This doesn't count against you.</div>`);
+    if (st.phase === "declined") h = card("", `<b>You turned this one down.</b>`);
+    if (st.phase === "gone") h = card("", `<b>This callout is no longer available.</b>`);
+    $("d-cards").innerHTML = h;
+  } else if (st.phase === "ringing") { const l = $("d-left"), b = $("d-bar"); if (l) l.textContent = left + "s"; if (b) b.style.width = left / 60 * 100 + "%"; }
+  $("d-queue").innerHTML = st.q.length ? st.q.map((r, i) => `<div class="q"><span>${i + 1}. ${r.w}</span><span class="pill ${r.c}">${r.n}</span></div>`).join("") : `<p class="small">No live callout yet.</p>`;
+  $("d-score").textContent = st.score.toFixed(2); $("d-meter").style.width = st.score * 100 + "%";
+  $("d-log").textContent = st.log;
+  $("d-start").disabled = live();
+}
+$("d-cards").addEventListener("click", e => { const b = e.target.closest("[data-a]"); if (!b) return; b.dataset.a === "take" ? take() : decline(); });
+function setMode(m) { mode = m; clearInterval(timer); timer = null; key = ""; $("d-prop").setAttribute("aria-pressed", m === "proposal"); $("d-v42").setAttribute("aria-pressed", m === "v42"); fresh(); render(); }
+$("d-prop").onclick = () => setMode("proposal"); $("d-v42").onclick = () => setMode("v42");
+$("d-start").onclick = start; $("d-reset").onclick = () => setMode(mode);
+
+fresh(); render(); drawCharts();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawCharts);
+const startAt = parseInt((location.hash || "").slice(1), 10);
+go(Number.isFinite(startAt) ? startAt - 1 : 0);
+</script>
+</body>
+</html>
