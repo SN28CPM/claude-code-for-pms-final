@@ -572,6 +572,12 @@ $("d-start").onclick = start; $("d-reset").onclick = () => setMode(mode);
 
 fresh(); render(); drawCharts();
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawCharts);
+// "?shot#N" shows slide N without the nav bar, in light colours, with the demo paused at 61s (used to make the PDF).
+if (location.search.includes("shot")) {
+  document.querySelector(".nav").style.display = "none";
+  document.documentElement.setAttribute("data-theme", "light"); drawCharts();
+  start(); st.t = 59; tick(); clearInterval(timer); timer = null; render();
+}
 const startAt = parseInt((location.hash || "").slice(1), 10);
 go(Number.isFinite(startAt) ? startAt - 1 : 0);
 </script>
