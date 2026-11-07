@@ -59,6 +59,11 @@ The real weekly numbers (owned by Ravi) for the 12 weeks before and the 10 weeks
       acceptance band.
 - [ ] Ravi signs off on the numbers, and they replace the "rough" figures in all discussions.
 
+*Progress, 7 Nov:* weekly acceptance, and missed vs turned down, before and after 4.2,
+are now measured from the `pings` table. They set criteria AC1–AC9 in
+`dispatch-4.2-acceptance-test.md` (summarized in section 8). Still open: time-to-accept
+(no answer times are recorded), prior-year data, segments, and Ravi's sign-off.
+
 ### A2. "Phone never goes off" explained
 **Acceptance criteria**
 - [ ] For a sample of at least 20 responders named in "never goes off" tickets (handled
@@ -92,8 +97,8 @@ A handler can see when, and why, a responder they look after is getting fewer pi
 
 **Acceptance criteria**
 - [ ] Given a responder whose ping count over the last 7 days is well below their usual level,
-      the handler sees a notice in the console naming the main reason. The threshold is set
-      from A1.
+      the handler sees a notice in the console naming the main reason. "Well below" means
+      under half their usual weekly pings, the same line as AC7.
 - [ ] The reason is shown in handler language (for example, "turned down or missed 4 recent
       pings"), not as a score.
 - [ ] The handler sees what would restore the responder's position.
@@ -113,13 +118,18 @@ A responder who has gone quiet understands why and isn't left guessing.
 ### B3. Missed-ping experience (if A4 supports a change)
 **Acceptance criteria**
 - [ ] The share of "gone before I could answer" tickets falls by at least half within 4 weeks of release.
-- [ ] Median time-to-accept doesn't get worse than its post-4.2 level.
+- [ ] Missed pings are back at 3.5% or less a week (AC2).
+- [ ] The median time to reach the responder who takes the callout is back at 29 seconds or
+      less (AC6). It was 61 seconds after 4.2. The old line, "time-to-accept no worse than
+      post-4.2", is dropped: any fix that brings slow responders back would break it.
 
 ### B4. Routing behaviour fix (only if A2/A3 find unintended behaviour)
 **Acceptance criteria**
 - [ ] The behaviour matches the decision recorded in A3, and is covered by automated tests.
 - [ ] Wide-area responders' ping share stays at or above its post-4.2 level (from A1).
-- [ ] Acceptance rate returns to the pre-4.2 baseline (from A1) within 6 weeks of release.
+- [ ] Acceptance rate is back at 75% or more a week (AC1) within 6 weeks of release.
+- [ ] AC1–AC9 all pass for 4 weeks in a row. That includes nobody below half or above
+      1.5× their usual weekly pings (AC7, AC8).
 - [ ] Rollout is gradual, with a rollback trigger agreed in advance by Marcus and the PM.
 
 ### B5. Release gate (applies to B1–B4)
@@ -150,7 +160,8 @@ A responder who has gone quiet understands why and isn't left guessing.
 - [ ] Tickets are tagged "never goes off", "gone before answer" and "filter persistence", so
       Support and Product can track them separately each week.
 - [ ] Nadia's weekly split is shared with the PM and Ravi.
-- [ ] Ticket volume returns to the pre-4.2 normal range for 4 consecutive weeks.
+- [ ] Ticket volume returns to the pre-4.2 normal range for 4 consecutive weeks: 8 or fewer
+      tickets a week (it was 5–8), and no more than 1 callout-related ticket a week (AC9).
 
 ## 7. Follow-ups (outside this fix)
 
@@ -164,17 +175,25 @@ A responder who has gone quiet understands why and isn't left guessing.
 
 | Metric | Target | Source |
 | --- | --- | --- |
-| Acceptance rate | Back at the pre-4.2 baseline | A1 (Ravi) |
-| Time-to-accept | No worse than the pre-4.2 baseline | A1 |
-| Wide-area responders' ping share | At or above post-4.2 level | A1 |
-| Callout ticket volume | Normal range for 4 weeks in a row | C3 (Nadia) |
+| Acceptance rate | 75% or more a week (it was 76.8%, and 72.7% by 31 Aug) | `pings` (Ravi) |
+| Missed pings | 3.5% or less a week (it was 2.3%, then 12.7–21.5%) | `pings` |
+| Callouts nobody took | 8.3% or less a week, and 6% or less over 4 weeks (it was 5.1%, then 11.2%) | `callouts` + `pings` |
+| Time to reach the responder who takes it | Median of 29 s or less (it was 17–29 s, then 61 s) | `pings` |
+| Time-to-accept | No worse than pre-4.2, once answer times are logged | A1/A4 (Ravi) |
+| Responder load | Nobody below 50% or above 150% of their usual weekly pings | `pings`, per responder |
+| Callout ticket volume | 1 callout-related ticket a week or fewer, and 8 or fewer tickets in total | `support_tickets` (Nadia) |
+| Wide-area responders' ping share | At or above post-4.2 level | A1 (no data yet) |
 | Handlers who can explain a quiet responder | 3/3 in testing | B1 |
 
-All baseline values are TBD until A1 is complete. No numbers have been assumed.
+These come from the six weeks before 4.2 (29 Jun – 9 Aug). The worst normal week sets each
+limit. They're the full set AC1–AC9 in `dispatch-4.2-acceptance-test.md`, where 4.2 itself
+fails 8 of 9. The weekly trends report checks them every Monday. Ravi still needs to sign
+them off (A1).
 
 ## 9. Open questions
 
 1. Is the drop seasonal, caused by 4.2, or both? (A1, A2)
 2. Was it intended that the 4.2 change applies the same way to responders who turn jobs down? (A3)
 3. Which second item, besides Availability Confidence, was squeezed out of 4.2? (C2)
-4. What is "normal" ticket volume? Nadia to confirm.
+4. What is "normal" ticket volume? The data says 5–8 tickets a week before 4.2, with 0–1
+   callout-related. Nadia to confirm.

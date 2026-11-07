@@ -1,0 +1,25 @@
+{
+  "release_4_2": "2026-08-12",
+  "fix_launch": null,
+  "quiet_responders": ["Farlight", "The Undertow", "Vesper", "Meteor Mite"],
+  "targets": {
+    "missed_pct_max": 3.0,
+    "quiet_pings_each_min": 6,
+    "unfilled_pct_max": 6.0,
+    "quiet_tickets_max": 0,
+    "time_to_accept_max_s": 43
+  },
+  "acceptance_criteria": {
+    "source": "dispatch-4.2-acceptance-test.md",
+    "AC1_taken_pct_min": 75.0,
+    "AC2_missed_pct_max": 3.5,
+    "AC3_turned_down_pct_max": 23.0,
+    "AC4_unfilled_pct_max": 8.3,
+    "AC5_pings_per_callout_max": 1.26,
+    "AC6_secs_to_taker_max": 29,
+    "AC7_below_half_max": 0,
+    "AC8_above_150_max": 0,
+    "AC9_callout_tickets_max": 1
+  },
+  "report_dir": "reports/weekly-trends"
+}

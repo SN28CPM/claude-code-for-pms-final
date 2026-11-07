@@ -1,6 +1,6 @@
-# Solution brief: bring quiet responders back, keep the 60-second ping wait
+# Four responders went quiet after 4.2
 
-**For:** Helen Achebe · **From:** Rook Dispatch PM · **Date:** 7 Nov 2026 · **Status:** draft for discussion
+**For:** Helen Achebe · **Owner:** [PM name], Rook Dispatch PM, accountable for this brief and its delivery · **Date:** 7 Nov 2026 · **Status:** draft for discussion
 
 ## The problem
 
@@ -13,6 +13,9 @@ again. Four responders (Farlight, The Undertow, Vesper, Meteor Mite) went from
 about 12 pings a week to about 1. Their home-area work moved to responders from
 other areas, and ten others now carry the load (up to 21 pings a week). Handlers
 see "my responder's phone has gone quiet" and have no way to see why.
+*Sources: `pings` table, 29 Jun – 6 Sep (missed pings went from 2% to 18% on
+12 Aug); `support_tickets`, 30 "quiet responder" tickets from 17 Aug; the routing
+code in `history.py`.*
 
 **Changing a number won't fix it.** In testing, going back to 90 seconds without
 anything else brings slow responders back to only about 2 pings a week, because
@@ -72,15 +75,36 @@ callouts equally fast (about 50 seconds). But we don't know how long responders
 really take to answer. If it's more than 90 seconds, going back to 90 fails
 again. This proposal keeps working because the ping stays open.
 
+## How we'll know it worked
+
+Measured by Ravi from launch day. Baselines are the pre-4.2 weeks (29 Jun – 11 Aug).
+
+| Measure | Target | By | Source |
+| --- | --- | --- | --- |
+| Pings to the four quiet responders | Each back above half their pre-4.2 level (6+ a week) | 4 weeks after launch | `pings` table |
+| Pings missed with no answer at all | 3% or less (2.3% before 4.2, 18% now) | 4 weeks after launch | `pings` table, once "covered" is logged separately |
+| New quiet-responder tickets | None | Weeks 3–4 after launch | `support_tickets` (Nadia) |
+| Callouts nobody took | 6% or less (5.5% before 4.2, 11% now) | 6 weeks after launch | `pings` table |
+| **Guardrail:** median time-to-accept | 43 seconds or less (the 4.1 level) | Every week | `pings` table |
+
+The unfilled-callouts target is a hope: the test data doesn't reproduce that rise (cost 6).
+The time-to-accept guardrail replaces requirement B3's post-4.2 baseline, which any fix
+that brings slow responders back would break (cost 3).
+
+**Not in this brief (follow-ups):**
+- A fairness rule for the busiest responders, such as The Gale (cost 4).
+- Availability Confidence, deferred from 4.2, which stays a separate roadmap decision.
+
 ## What we need
 
 | Who | Decision or work |
 | --- | --- |
-| **Helen** | Pick this or going back to 90s plus a fresh start. Accept slower time-to-accept (cost 3), which conflicts with requirement B3 as written. Decide whether this replaces the "Ping timeout tuning" roadmap item. |
+| **[PM name]** | Owns the brief end to end: gets the decisions below, tracks the measures above, and reports at 4 and 6 weeks. |
+| **Helen** | Approve this recommendation, or choose the alternative (90s plus a fresh start). Accept the time-to-accept guardrail in place of requirement B3 as written. Decide whether this replaces the "Ping timeout tuning" roadmap item. |
 | Wen | Confirm the live system matches the code, and that scores *can* be reset. Today they're kept only in memory. Size the work. Add the scoring rules to the automated tests. |
 | Marcus | Approve the scoring change. `config.py` says to tell him before any change. Agree the rollout and rollback trigger (cost 8). |
 | Ravi | Add a "covered" outcome and log seconds-to-answer before launch (see cost 1). |
-| Sofia | Design the phone wording and the console alert. Test it with 3 handlers, including Kip. The clickable prototype comes next. |
+| Sofia | Design the phone wording and the console alert. Test it with 3 handlers, including Kip, using the clickable prototypes in `05-super-speed/` (`prototype.html`, `prototype-mobile.html`, and `dispatcher.html` with `responder.html`). |
 | Nadia | Support briefing and reply templates before release day (cost 9). |
 
 ---
@@ -150,11 +174,5 @@ rule checks in `test_rules.py` confirm the scoring table above.
    it happens once, at full launch.
 9. **Support:** Nadia's team will get "why did my ping say *covered*?" and "why am
    I suddenly getting callouts again?". They need a briefing and reply templates
-   before release day. The release notes should list what's deferred: the
-   busiest-responder fix and Availability Confidence.
-
-**Success after launch (targets are placeholders for the team to agree):**
-- The four quiet responders are back above half their pre-4.2 volume within 4 weeks.
-- Quiet-responder tickets fall to zero.
-- Unfilled callouts head back toward 5%.
-- A fair-load target for the busiest responders, set as part of the follow-up fix.
+   before release day. The release notes should list the follow-ups this brief
+   leaves out (see "Not in this brief").

@@ -202,3 +202,17 @@ Session notes (Module 5, 7 Nov 2026):
   4.2) and a combined distance + pings view. It shows Meteor Mite is nearest (9 min) but missed 8 of 14. There's
   also a two-window version: `dispatcher.html` (runs the clock and rules) and `responder.html` (Mite's phone), synced
   across windows. It was tested through a local server, not by double-clicking the files. `.claude/launch.json` starts it.
+
+Session notes (Module 6, 7 Nov 2026):
+- Project skills in `.claude/skills/`: `review-checklist` (checks a brief for owner, success measures, scope, and
+  problem before fix), `fix-brief` (proposes fixes and edits only after I approve; also a new-brief template), and
+  `weekly-trends` (queries pings and tickets, writes `reports/weekly-trends/<date>.md` + `latest.html`).
+- `weekly-trends` is scheduled every Monday ~9:11 (task `rook-weekly-trends`, Auto mode, stored in
+  ~/.claude/scheduled-tasks, outside the folder, with my OK). On fix launch day, set `fix_launch` in its config.json.
+  The data ends 6 Sep, so reports show STALE until the tables get new rows.
+- `brief.md` was fixed per the checklist: problem-led title, sources line, a "How we'll know it worked" table with
+  targets, dates and sources, and follow-ups split out. Owner is still `[PM name]` (my name is needed).
+- `dispatch-4.2-acceptance-test.md`: AC1–AC9, with limits set by the worst pre-4.2 week (29 Jun – 9 Aug). 4.2 fails
+  8 of 9 (only turn-downs recover). Its own goal failed: reaching the taker went from ~26s to 61s. AC1–AC9 are now
+  in `dispatch-4.2-requirements.md` §8 and the weekly report. Callouts/week fell ~140 → ~120 after 4.2 (unexplained;
+  ask Ravi/Nadia).

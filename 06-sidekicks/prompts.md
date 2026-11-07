@@ -15,6 +15,16 @@ prompt library built from your own questions.
 
 ### 1.
 
+yes fix the brief and make it a skill to fix these type of things when we prepare a brief going forward
+
 ### 2.
 
+change the skill to make sure i approve  of any changes
+
 ### 3.
+
+create a skill to display trends every week before and after the fix. And this needs to run every week.
+
+### 4.
+
+based on the data we have  can you generate an acceptance criteria and also test 4.2
