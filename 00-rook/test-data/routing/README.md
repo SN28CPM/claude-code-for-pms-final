@@ -16,6 +16,9 @@ No real responder records are used.
 | `simulate.py` | Runs the data through the real `routing.py` and `history.py` from `00-rook/code/dispatch-routing`, once per scenario |
 | `out/pings_<scenario>.csv` | The resulting pings, with the same columns as the `rook.pings` table: `callout_number, responder, sent_at, outcome` |
 | `out/summary.md` | Metrics, acceptance-criteria pass/fail, and pings per week for each responder |
+| `simulate_keep60.py` | Fixes that keep the 60s ping wait (ping stays open, late answers free). Writes `out/summary_keep60.md` |
+| `test_rules.py` | Scripted one-callout checks of the keep-60s scoring rules (who gets the job, what each score does) |
+| `stress_test.py` | Every fix over 20 seeds on a 12-week timeline (4.1 → 4.2 → fix), plus what-ifs on answer speed, signal, availability and gaming. Writes `out/stress_test.md` |
 
 Run it from this folder:
 
