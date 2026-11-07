@@ -216,3 +216,8 @@ Session notes (Module 6, 7 Nov 2026). The post-4.2 recovery project is named **J
   8 of 9 (only turn-downs recover). Its own goal failed: reaching the taker went from ~26s to 61s. AC1–AC9 are now
   in `dispatch-4.2-requirements.md` §8 and the weekly report. Callouts/week fell ~140 → ~120 after 4.2 (unexplained;
   ask Ravi/Nadia).
+- Later in Module 6: `final-report.html` is a 12-slide presentation with one finding and my exact prompt per
+  module, real-data charts, an in-slide prototype demo, and the skills slide. The project is **Jedi Order**, owner
+  **Yoda** (in the brief, requirements, acceptance test, report and weekly report). `final-report-storybook.html`
+  retells it for a 3-year-old (read-aloud + tap-in-time game). `final-report-storybook.pdf` is built from page
+  screenshots, because headless Chrome's print fails on the emoji (render with `?shot#N`).

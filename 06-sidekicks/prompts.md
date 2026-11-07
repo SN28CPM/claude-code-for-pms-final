@@ -28,3 +28,19 @@ create a skill to display trends every week before and after the fix. And this n
 ### 4.
 
 based on the data we have  can you generate an acceptance criteria and also test 4.2
+
+### 5.
+
+Give the project manager name as yoda
+
+### 6.
+
+Name the project as Jedi Order
+
+### 7.
+
+Make it as visual  as possible and tell it like a story to a 3 year
+
+### 8.
+
+convert it to a pdf
