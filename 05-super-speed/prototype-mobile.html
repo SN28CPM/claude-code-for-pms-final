@@ -33,6 +33,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .head h1{font-size:24px;margin:0;font-weight:700}
 .head p{margin:2px 0 0;color:var(--ink-2);font-size:13px}
 .screen{flex:1;overflow-y:auto;padding:0 14px 14px;display:flex;flex-direction:column;gap:10px}
+.screen > *{flex-shrink:0}
 .card{background:var(--card);border-radius:18px;padding:14px;border:1px solid var(--line)}
 .card h3{margin:0 0 4px;font-size:16px}
 .small{font-size:13px;color:var(--ink-2)}
@@ -92,6 +93,16 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .mins{font-weight:700;font-variant-numeric:tabular-nums;font-size:15px}
 .dbar{height:4px;border-radius:2px;background:var(--app);overflow:hidden;margin-top:3px}
 .dbar i{display:block;height:100%;background:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--ink-2);margin-bottom:6px}
+.legend span{display:flex;align-items:center;gap:4px}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.c-take{background:#1f9d5c}.c-no{background:#d4534f}.c-miss{background:#e8a93a}
+.crow{padding:7px 0;border-bottom:1px solid var(--line)}
+.crow:last-child{border-bottom:0}
+.crow .top{display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px}
+.stack{display:flex;height:20px;gap:2px}
+.stack i{display:block;height:100%;font-style:normal;font-size:11px;font-weight:600;color:#fff;text-align:center;line-height:20px;overflow:hidden;min-width:2px}
+.stack i:first-child{border-radius:4px 0 0 4px}.stack i:last-child{border-radius:0 4px 4px 0}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--danger);margin-left:4px;vertical-align:middle}
 </style>
 </head>
@@ -257,11 +268,50 @@ const RESPONDERS = [
   ["Corporal Ashgrove","Northfield","",38,true], ["Halfmoon","Westbury","",41,false],
 ].map(([name, area, handler, mins, available]) => ({ name, area, handler, mins, available }));
 const HORIZON = 45;
-let sortBy = "distance", availOnly = false;
+// What each responder did with their pings since 4.2 (12 Aug – 6 Sep), from the rook.pings table.
+const OUTCOMES = {
+  "Stormwrack": [45,9,9], "Captain Vantage": [42,11,6], "The Gale": [48,13,8], "Sgt. Falkirk": [36,8,8],
+  "Cindermark": [29,8,5], "Nightwell": [47,15,8], "Sgt. Bulwark": [26,6,7], "Ironvale": [26,6,7],
+  "The Longcast": [21,6,5], "Corporal Ashgrove": [19,6,4], "Halfmoon": [21,7,5], "The Drift": [18,5,5],
+  "Vesper": [5,3,9], "Meteor Mite": [3,3,8], "The Undertow": [3,2,9], "Farlight": [2,2,7],
+};
+let sortBy = "distance", availOnly = false, allView = "list", share = false;
+const total = r => OUTCOMES[r.name].reduce((a, b) => a + b, 0);
+
+function chartCard(list) {
+  const max = Math.max(...list.map(total));
+  const rows = list.map(r => {
+    const [t, d, m] = OUTCOMES[r.name], tot = total(r), scale = share ? 100 / tot : 100 / max;
+    const seg = (n, cls) => n ? `<i class="${cls}" style="width:${n * scale}%">${share ? Math.round(n / tot * 100) + "%" : n}</i>` : "";
+    return `<div class="crow"><div class="top"><span>${r.name}</span><span class="small">${tot} pings</span></div>
+      <div class="stack" role="img" aria-label="${r.name}: ${t} taken, ${d} turned down, ${m} missed">${seg(t, "c-take")}${seg(d, "c-no")}${seg(m, "c-miss")}</div></div>`;
+  }).join("");
+  return `<div class="card"><div class="legend"><span><i class="sw c-take"></i>Taken</span><span><i class="sw c-no"></i>Turned down</span><span><i class="sw c-miss"></i>Missed</span></div>${rows}</div>
+    <div class="small">Pings since 4.2 (12 Aug – 6 Sep), from the pings table. ${share ? "Numbers are each responder's share." : "Bar length = number of pings."}</div>`;
+}
+
+function bothCard(list) {
+  const max = Math.max(...list.map(total));
+  const rows = list.map(r => {
+    const [t, d, m] = OUTCOMES[r.name], tot = total(r), scale = share ? 100 / tot : 100 / max;
+    const q = s.queue.find(x => x.who === r.name);
+    const [note, cls] = q ? [q.note, q.cls] : r.available ? ["Available", "t-ok"] : ["Off duty", "t-muted"];
+    const seg = (n, c) => n ? `<i class="${c}" style="width:${n * scale}%">${share ? Math.round(n / tot * 100) + "%" : n}</i>` : "";
+    return `<div class="crow${r.available ? "" : " off"}" style="${r.available ? "" : "opacity:.6"}">
+      <div class="top"><span><b>${r.name}</b> <span class="small">${r.area}${r.handler === "Kip" ? " · yours" : ""}</span></span><span class="tag ${cls}">${note}</span></div>
+      <div class="row small" style="margin:2px 0 3px"><span>📍 ${r.mins} min away</span><span>${tot} pings since 4.2</span></div>
+      <div class="dbar" style="margin-bottom:5px" aria-hidden="true"><i style="width:${(1 - r.mins / HORIZON) * 100}%"></i></div>
+      <div class="stack" role="img" aria-label="${r.name}: ${r.mins} minutes away; ${t} taken, ${d} turned down, ${m} missed">${seg(t, "c-take")}${seg(d, "c-no")}${seg(m, "c-miss")}</div></div>`;
+  }).join("");
+  return `<div class="card"><div class="legend"><span><i class="sw" style="background:var(--accent)"></i>Closeness</span><span><i class="sw c-take"></i>Taken</span><span><i class="sw c-no"></i>Turned down</span><span><i class="sw c-miss"></i>Missed</span></div>${rows}</div>
+    <div class="small">Nearest isn't always most reliable: Meteor Mite is closest to this callout but missed 8 of 14. Travel times are made up; ping counts are from the pings table.</div>`;
+}
 
 function allScreen() {
   let list = RESPONDERS.filter(r => !availOnly || r.available);
-  list = [...list].sort(sortBy === "name" ? (a, b) => a.name.localeCompare(b.name) : (a, b) => a.mins - b.mins);
+  const missRate = r => OUTCOMES[r.name][2] / total(r);
+  list = [...list].sort(sortBy === "name" ? (a, b) => a.name.localeCompare(b.name)
+    : sortBy === "missed" ? (a, b) => missRate(b) - missRate(a) : (a, b) => a.mins - b.mins);
   const rows = list.map(r => {
     const q = s.queue.find(x => x.who === r.name);
     const [note, cls] = q ? [q.note, q.cls] : r.available ? ["Available", "t-ok"] : ["Off duty", "t-muted"];
@@ -271,18 +321,25 @@ function allScreen() {
   }).join("");
   const free = RESPONDERS.filter(r => r.available).length;
   return `<div class="card"><h3>Eastgate callout · stadium</h3><div class="small">Travel time for every responder · ${free} of ${RESPONDERS.length} available</div></div>
-    <div class="chips" role="group" aria-label="Sort and filter">
-      <button data-act="sort-distance" aria-pressed="${sortBy === "distance"}">Nearest first</button>
-      <button data-act="sort-name" aria-pressed="${sortBy === "name"}">Name</button>
-      <button data-act="avail" aria-pressed="${availOnly}">Available only</button>
+    <div class="seg" role="group" aria-label="View" style="margin:0">
+      <button data-act="view-list" aria-pressed="${allView === "list"}">Distance</button>
+      <button data-act="view-chart" aria-pressed="${allView === "chart"}">Pings</button>
+      <button data-act="view-both" aria-pressed="${allView === "both"}">Combined</button>
     </div>
-    <div class="card" style="padding:4px 14px">${rows}</div>
-    <div class="small">Bar = how close on the routing scale (full at 0 min, empty at ${HORIZON} min). Travel time only, never anyone's location.</div>`;
+    <div class="chips" role="group" aria-label="Sort and filter">
+      <button data-act="sort-distance" aria-pressed="${sortBy === "distance"}">Nearest</button>
+      <button data-act="sort-name" aria-pressed="${sortBy === "name"}">Name</button>
+      <button data-act="sort-missed" aria-pressed="${sortBy === "missed"}">Most missed</button>
+      <button data-act="avail" aria-pressed="${availOnly}">Available only</button>
+      ${allView !== "list" ? `<button data-act="share" aria-pressed="${share}">Show %</button>` : ""}
+    </div>
+    ${allView === "both" ? bothCard(list) : allView === "chart" ? chartCard(list) : `<div class="card" style="padding:4px 14px">${rows}</div>
+    <div class="small">Bar = how close on the routing scale (full at 0 min, empty at ${HORIZON} min). Travel time only, never anyone's location.</div>`}`;
 }
 
 function render() {
   $("clock").textContent = clock(s.t);
-  const key = [tab, mode, s.phase, s.launchSeen, s.offered, s.turned, s.missed, open.mite, open.gale, sortBy, availOnly, s.queue.map(q => q.note).join()].join("|");
+  const key = [tab, mode, s.phase, s.launchSeen, s.offered, s.turned, s.missed, open.mite, open.gale, sortBy, availOnly, allView, share, s.queue.map(q => q.note).join()].join("|");
   if (key !== lastKey) {
     lastKey = key;
     $("screen").innerHTML = tab === "mite" ? miteScreen() : tab === "kip" ? kipScreen() : allScreen();
@@ -313,6 +370,8 @@ $("screen").addEventListener("click", e => {
   else if (a === "mite" || a === "gale") { open[a] = !open[a]; render(); }
   else if (a.startsWith("sort-")) { sortBy = a.slice(5); render(); }
   else if (a === "avail") { availOnly = !availOnly; render(); }
+  else if (a.startsWith("view-")) { allView = a.slice(5); render(); }
+  else if (a === "share") { share = !share; render(); }
 });
 function setTab(t) { tab = t; if (t === "kip") s.kipUnread = false; render(); }
 $("tab-mite").onclick = () => setTab("mite");
